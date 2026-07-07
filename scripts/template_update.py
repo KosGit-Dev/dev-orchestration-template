@@ -765,9 +765,21 @@ def cmd_export(args: argparse.Namespace, project_dir: Path) -> int:
         print(f"エラー: --template-dir が存在しません: {template_dir}")
         return EXIT_ERROR
 
-    manifest = load_manifest(manifest_path)
+    # 分類元マニフェストの解決:
+    # 「何がテンプレート管理か」はテンプレート側の定義を正とするため、
+    # export はテンプレート側マニフェストを優先して読む。子側マニフェストは
+    # apply（ローカル保護）用のカスタマイズであり、逆反映の範囲を狭めない。
+    template_manifest_path = template_dir / MANIFEST_FILE
+    if template_manifest_path.exists():
+        manifest = load_manifest(template_manifest_path)
+        catalog = load_catalog(template_dir / CATALOG_FILE)
+        print("  分類元: テンプレート側マニフェスト")
+    else:
+        manifest = load_manifest(manifest_path)
+        catalog = load_catalog(project_dir / CATALOG_FILE)
+        print("  分類元: 子リポジトリ側マニフェスト（テンプレート側に未配置のため）")
     categories = get_categories(manifest)
-    cross_check_catalog(categories, load_catalog(project_dir / CATALOG_FILE))
+    cross_check_catalog(categories, catalog)
 
     print("\n" + "=" * 60)
     print("逆方向同期（export） — 現リポジトリ → テンプレート")

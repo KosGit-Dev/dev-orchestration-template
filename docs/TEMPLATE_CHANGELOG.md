@@ -22,6 +22,7 @@
 ### 変更
 
 - `template-catalog.yml`: spec-kit feature を除去し `template.version` を 3.1.0 へ更新。
+- `scripts/template_update.py` の `export`: 分類元をテンプレート側マニフェスト優先に変更（子リポジトリが apply 保護のためにローカルマニフェストを保守的にしても、逆反映の範囲が狭まらない）。
 - `ai/context-index.yml` / `.template-update.yml` / `scripts/ai/audit_document_inventory.py` /
   `docs/agent-skills-integration.md` / `README.md` から Spec Kit 参照を除去。
 
