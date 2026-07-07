@@ -1,6 +1,7 @@
 /* オフライン対応 Service Worker: プリキャッシュ + stale-while-revalidate（GET） */
-const CACHE = 'wcq-v2';
+const CACHE = 'wcq-v3';
 const ASSETS = [
+  './',
   './index.html',
   './manifest.webmanifest',
   './css/style.css',
