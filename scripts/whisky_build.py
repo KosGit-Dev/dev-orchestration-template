@@ -206,6 +206,8 @@ def build_dist() -> None:
 
     html = re.sub(r'<link rel="stylesheet" href="([^"]+)">', inline_css, html)
     html = re.sub(r'<script src="([^"]+)"></script>', inline_js, html)
+    # 単一ファイル版は自己完結が前提のため、外部ファイルへの参照（PWA 用 link）を除去する
+    html = re.sub(r'<link rel="(?:manifest|apple-touch-icon)"[^>]*>\n?', "", html)
     DIST.mkdir(exist_ok=True)
     out = DIST / "whisky-connoisseur.html"
     out.write_text(html, encoding="utf-8")
