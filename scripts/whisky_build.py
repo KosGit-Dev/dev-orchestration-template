@@ -67,6 +67,9 @@ def validate_question(q: dict, src: str) -> str | None:
         return f"不正な answer: {q['answer']!r}"
     if len({str(c).strip() for c in q["choices"]}) != 4:
         return "選択肢に重複がある"
+    tags = q.get("tags")
+    if tags is not None and not (isinstance(tags, list) and all(isinstance(t, str) for t in tags)):
+        return f"tags が文字列リストでない: {tags!r}"
     return None
 
 

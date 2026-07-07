@@ -59,6 +59,8 @@ def test_valid_question_passes() -> None:
         ({"choices": ["a", "b", "c"]}, "choices"),
         ({"choices": ["a", "a", "b", "c"]}, "重複"),
         ({"explanation": ""}, "必須キー"),
+        ({"tags": "speyside"}, "tags"),
+        ({"tags": [1, 2]}, "tags"),
     ],
 )
 def test_invalid_question_rejected(patch: dict[str, object], reason_part: str) -> None:
