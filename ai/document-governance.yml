@@ -1,0 +1,49 @@
+schema_version: 1
+classes:
+  CORE_CONTROL:
+    read_every_session: true
+    examples:
+      - ai/command-router.yml
+      - ai/operation-policy.yml
+      - ai/context-index.yml
+      - ai/sdd-policy.yml
+      - ai/coherence-workflow.yml
+  AGENT_SPECIFIC:
+    read_by_tool: true
+    keep_short: true
+    examples:
+      - AGENTS.md
+      - CLAUDE.md
+      - .github/copilot-instructions.md
+  DOMAIN_SSOT:
+    read_when_relevant: true
+    examples:
+      - docs/requirements.md
+      - docs/design.md
+      - docs/policies.md
+      - docs/constraints.md
+      - docs/runbook.md
+  TASK_SPEC:
+    read_when_task_selected: true
+    examples:
+      - docs/specs/*.md
+  REFERENCE:
+    read_every_session: false
+    examples:
+      - docs/research/**
+      - docs/adr/**
+  ARCHIVE:
+    read_every_session: false
+    examples:
+      - docs/archive/**
+  GENERATED:
+    keep_out_of_git_by_default: true
+  DELETE_CANDIDATE:
+    require_summary_before_delete: true
+
+rules:
+  do_not_delete_on_first_inventory: true
+  prefer_archive_over_delete_initially: true
+  entrypoint_docs_should_delegate_to_ai_yml: true
+  avoid_feature_specific_content_in_core_control: true
+  version_history_belongs_in: docs/ai/change-log.md

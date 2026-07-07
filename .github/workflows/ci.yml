@@ -15,7 +15,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, staging]
+    branches: [main, master]
 
 permissions:
   contents: read
@@ -84,35 +84,16 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Type check (mypy)
+        if: hashFiles('src/**') != ''
         run: uv run mypy src/ tests/ ci/
 
       - name: Test (pytest)
         run: uv run pytest -q --tb=short
 
       # ---------------------------------------------------------------
-      # ミューテーションテスト（非ブロッキング）
-      # ---------------------------------------------------------------
-      # テストの有効性を検証するためにミューテーションテストを実行する。
-      # 現時点では品質指標として参考情報を収集するのみであり、CI をブロックしない。
-      - name: Mutation testing (mutmut)
-        if: hashFiles('pyproject.toml') != ''
-        continue-on-error: true
-        run: |
-          uv run mutmut run --no-progress 2>&1
-          uv run mutmut results
-
-      # ---------------------------------------------------------------
-      # セキュリティ: 依存パッケージ脆弱性スキャン
-      # ---------------------------------------------------------------
-      - name: Audit dependencies (pip-audit)
-        if: hashFiles('pyproject.toml') != ''
-        # 前提: 上記の uv sync による依存インストールが実行済みであること
-        # ローカルパッケージ（editable install）は PyPI に存在しないため除外する
-        run: |
-          uv pip install pip-audit --system
-          uv pip freeze | grep -v '^\-e' | grep -vi 'dev-orchestration-template' > /tmp/requirements-frozen.txt
-          pip-audit -r /tmp/requirements-frozen.txt --strict --progress-spinner=off
-
+      # 注意: ミューテーションテスト（mutmut）・依存パッケージ脆弱性スキャン（pip-audit）は
+      # 個人開発の既定 CI からは意図的に除外している（重い承認ルートを増やさない方針）。
+      # 導入したい場合は docs/TEMPLATE_CHANGELOG.md の記録を参照し、必要なジョブを追加すること。
       # ---------------------------------------------------------------
       # OpenTelemetry 計装確認（observability オプション有効時）
       # ---------------------------------------------------------------

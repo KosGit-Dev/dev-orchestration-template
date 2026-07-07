@@ -1,0 +1,85 @@
+schema_version: 1
+purpose: >
+  PR 作成前にリポジトリ横断の批判レビューを行い、Copilot の Must/Should 相当の指摘を
+  できるだけ事前に解消する。
+
+review_goals:
+  target_copilot_must: 0
+  target_copilot_should: 0_or_documented_reason
+
+review_lenses:
+  spec_consistency:
+    checks:
+      - requirements_design_spec_plan_alignment
+      - acceptance_criteria_covered
+      - non_goals_not_violated
+  doc_coherence:
+    checks:
+      - no_conflicting_control_documents
+      - context_index_points_to_current_sources
+      - no_stale_versioned_setup_docs_in_default_context
+  implementation_completeness:
+    checks:
+      - user_visible_outcome_implemented
+      - no_backend_only_completion_for_ui_task
+      - propagation_to_types_docs_api_if_needed
+  safety_policy:
+    checks:
+      - no_secret_exposure
+      - no_destructive_db_without_red_release_gate
+      # project-config.yml の policies で定義された重大操作の安全装置回避がないか
+      - no_project_defined_critical_operation_bypass
+  test_reliability:
+    checks:
+      - tests_assert_behavior_not_only_existence
+      - targeted_tests_match_changed_area
+  runtime_smoke:
+    checks:
+      - runtime_smoke_present_for_user_visible_change
+  copilot_preemptive:
+    checks:
+      - likely_must_should_findings_identified
+      - review_comment_response_plan_if_needed
+  fix_on_discovery:
+    # P-065: 発覚した lint/bug/型/テスト失敗はその場で修正し持ち越さない。
+    checks:
+      - static_checks_clean_ruff_format_mypy
+      - markdown_lint_clean_for_docs_changes  # .markdownlint.json 準拠
+      - no_dismissed_or_deferred_warnings_without_backlog_and_residual_risk
+      - targeted_and_regression_tests_pass
+
+outputs:
+  report: docs/ai/pre-pr-critical-review.md
+  machine_readable_optional: outputs/ai/pre-pr-critical-review.json
+  review_report_gate_json:
+    # 個人開発の既定では opt-in。多プロバイダのレビュー証跡ゲートを自動化する
+    # スクリプト（review_report_gate.py 等）はテンプレート既定には同梱せず、必要な
+    # プロジェクトが取り込んで有効化する。既定では下記の証跡配置と ANY-OF ルールを
+    # 手順として運用し、自動検証は任意とする。
+    required_when_changed_code_or_policy: false
+    # harness-symmetric: アクティブなハーネスが自前で実施した同等の包括レビュー
+    # 証跡を 1 つ置けば review-report-gate を満たす。特定 provider を一律必須にしない。
+    accepted_paths:
+      - docs/ai/reviews/YYYY-MM-DD-prNNN-codex.json
+      - docs/ai/reviews/YYYY-MM-DD-prNNN-claude.json
+      - docs/ai/reviews/YYYY-MM-DD-prNNN-copilot.json
+    rule: >
+      Claude Code で作業しているときは Claude（claude provider）、Copilot のときは copilot、
+      Codex のときは codex の自前レビュー証跡 1 つで充足する（Copilot AI レビュー + CI レビューに
+      準じた同等の包括レビュー）。いずれか 1 つの有効証跡が present なら pass（ANY-OF）。
+      複数 provider が同時利用可能な場合だけ実装側で優先順を明示する。
+    role_note: >
+      本表の codex / claude / copilot は provider ID（実在ツールの識別子）であり役割名ではない。
+      独立 peer 監査の役割定義と担い手の解決は ai/capability-registry.yml の
+      independent_peer_auditor と ai/sdd-policy.yml の independent_peer_fallback_ladder を正本とする。
+    generator: scripts/run_ai_review.py --review-report-output
+    validation_optional: >
+      自動検証を有効化する場合は、多プロバイダ証跡ゲートのスクリプトを取り込み、
+      変更差分に対して required provider の証跡が揃っているか検査する（既定では未同梱・任意）。
+    claude_provider_policy: >
+      Claude Code の claude provider は CLAUDE_REVIEW_COMMAND（scripts/ai/claude_review_command.py
+      = claude CLI headless / Claude Code セッション自体）で実行し、Anthropic API 課金を要しない
+      非課金経路を既定とする。これは codex / copilot と同等の first-class provider である。
+      Claude Code セッション内ではエージェント自身が同等レビューを実施し review-result 証跡を
+      生成してもよい。ANTHROPIC_API_KEY による Claude API review は別課金になり得るため、
+      AI_REVIEW_ALLOW_CLAUDE_API_BILLING=true を明示した場合だけの opt-in 補助に限る。

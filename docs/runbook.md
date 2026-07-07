@@ -105,10 +105,6 @@ Copilot エージェントの場合は `get_errors` ツール（filePaths 省略
 1. ロックファイルを削除して再インストール
 2. CI で動作確認する
 
-## モバイルでの開発
-
-iPhone / iPad からの開発作業については [docs/mobile-workflow.md](mobile-workflow.md) を参照する。
-
 ## ロールバック手順
 
 ### フィーチャーブランチの巻き戻し
@@ -135,9 +131,9 @@ git push origin main
 3. CI が通ることを確認し、プッシュする
 4. 必要に応じて修正 PR を別途作成する
 
-### 本番リリースのロールバック
+### リリース済みバージョンのロールバック
 
-GitHub Releases を用いて前バージョンを特定し、ロールバックする。
+このテンプレートは main 一本化運用（長命の派生ブランチを持たない）であるため、リリース済みバージョンの問題は `main` 自体への revert で対応する。GitHub Releases を使っている場合はタグで前バージョンを特定する。
 
 **前バージョンの特定**:
 
@@ -153,16 +149,17 @@ gh release view <タグ名>
 
 1. `gh release list` で前回の安定リリースのタグを特定する
 2. 対象タグのコミット SHA を確認する: `git log --oneline <タグ名>`
-3. production ブランチを安定コミットに巻き戻す:
+3. `main` を安定コミットに巻き戻す:
 
    ```bash
-   git checkout production
+   git checkout main
+   git pull origin main
    # 安定コミット以降のコミットを確認
    git log --oneline <安定コミットSHA>..HEAD
    # ロールバック対象のコミット SHA を新しい順に列挙して revert
    git revert --no-commit <コミット1のSHA> <コミット2のSHA> ... <コミットNのSHA>
    git commit -m "fix: <タグ名> へのロールバック"
-   git push origin production
+   git push origin main
    ```
 
 4. CI / 品質ゲートの通過を確認する

@@ -99,11 +99,14 @@ github:
   project_name: "開発ロードマップ"
 
 # --- AI モデル設定 ---
-# オーケストレーション（エージェントパイプライン）で使用する AI モデルの設定。
-# 変更後に `scripts/update_agent_models.sh` を実行すると各エージェントファイルに反映される。
-# モデルの指定値は VS Code Copilot Chat のモデル選択ドロップダウンに表示される名称を使用する。
+# capability role（統括・監査・実装 等）→ 論理 tier（top/high/standard/light）の割当は
+# `ai/capability-registry.yml` を正本とする。実行時にどのプロバイダ・モデル名を使うかは
+# 各ハーネス roster（`.github/agents/*.agent.md` / `.claude/agents/*.md` 等）の frontmatter
+# `model:` が正本であり、本セクションはその生成入力（`scripts/update_agent_models.sh` が
+# 各エージェントファイルへ展開する）に過ぎない。プロバイダ固有モデル名を追記する場合は
+# 上記2ファイルの記載と矛盾しないようにすること。
 ai_models:
-  # 全エージェント共通のデフォルトモデル
+  # 全エージェント共通のデフォルトモデル（省略時は各ハーネスの既定選択に委ねてよい）
   default: "Claude Opus 4.6 (copilot)"
 
   # エージェントごとに異なるモデルを使いたい場合に個別指定する（任意）

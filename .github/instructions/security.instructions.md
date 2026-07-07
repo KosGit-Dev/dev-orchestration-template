@@ -41,3 +41,6 @@
 - 外部 URL の直書きがないこと
 - `subprocess` の安全な使用
 - 依存追加の妥当性
+## レビューループ制約
+
+**PR レビュー対応は最大 3 ラウンド**。Round 3 後の非ブロッキング Must/Should は Backlog 化、即時ブロッカーは fail-close。

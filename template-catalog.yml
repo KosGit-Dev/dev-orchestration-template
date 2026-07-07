@@ -1,0 +1,94 @@
+# テンプレート機能カタログ（正本）
+# ─────────────────────────────────────────────────────────────
+# このファイルはテンプレート自身の「版」と「提供機能」を宣言する正本である。
+# scripts/template_update.py の check / apply が template.version を読み、
+# 子リポジトリ側の .template-version.yml と突き合わせて更新有無を判定する。
+#
+# - template.repository … テンプレートの取得元 URL の唯一の正本。
+#   （GitHub 上でリポジトリ名を変更してもリダイレクトで動作する。表記は
+#     「ai-dev-template（旧: dev-orchestration-template）」とする）
+# - features[].paths … .template-update.yml のカテゴリ分類と矛盾しないこと。
+#   矛盾があれば apply / export 時に警告する（catalog ↔ manifest 整合検査）。
+# - paths はインラインリスト（["a", "b"]）で記述する。末尾 "/" はディレクトリ全体を表す。
+# ─────────────────────────────────────────────────────────────
+
+schema_version: 2
+
+template:
+  name: ai-dev-template
+  display_name: AI駆動開発テンプレート
+  repository: https://github.com/KosGit-Dev/dev-orchestration-template.git
+  version: "3.0.0"
+
+features:
+  - id: ai-operating-model
+    name: AI Operating Model（ai/*.yml 一式）
+    since: "3.0.0"
+    paths: ["ai/"]
+    policy: always_update
+
+  - id: three-harness-entry
+    name: 3ハーネス入口ファイル（Claude Code / Copilot / Codex 共通の入口）
+    since: "3.0.0"
+    paths: ["CLAUDE.md", "AGENTS.md", ".github/copilot-instructions.md", ".claude/settings.json"]
+    policy: add_only
+
+  - id: claude-code-harness
+    name: Claude Code ハーネス（サブエージェント・hooks・output-styles・skills）
+    since: "3.0.0"
+    paths: [".claude/agents/", ".claude/hooks/", ".claude/output-styles/", ".claude/skills/"]
+    policy: always_update
+
+  - id: copilot-agents-roster
+    name: Copilot / 共通エージェント roster とレビュー資材
+    since: "3.0.0"
+    paths: [".github/agents/", ".github/prompts/", ".github/copilot-code-review-instructions.md", ".github/PULL_REQUEST_TEMPLATE.md", ".github/ISSUE_TEMPLATE/", ".github/instructions/review-loop.instructions.md"]
+    policy: always_update
+
+  - id: hooks-guards
+    name: 完了事故防止ガード（Claude Code hooks 実体・トリガーファイル）
+    since: "3.0.0"
+    paths: ["scripts/hooks/", ".github/hooks/", ".github/.copilot-trigger", ".github/full-plan-execution.flag.example"]
+    policy: always_update
+
+  - id: agent-skills
+    name: エージェントスキル（agmsg / stop-ai-slop-jp）
+    since: "3.0.0"
+    paths: [".agents/"]
+    policy: always_update
+
+  - id: spec-kit
+    name: Spec Kit 導入物（.specify 一式）
+    since: "3.0.0"
+    paths: [".specify/"]
+    policy: always_update
+
+  - id: governance-docs
+    name: 運用・設計ガイド文書（テンプレート共通）
+    since: "3.0.0"
+    paths: ["docs/orchestration.md", "docs/hooks-guide.md", "docs/spec-kit-bridge.md", "docs/agent-skills-integration.md", "docs/quality-guide.md", "docs/observability-guide.md", "docs/security-policy-template.md", "docs/GETTING_STARTED.md", "docs/MODE_GUIDE.md"]
+    policy: always_update
+
+  - id: ci-quality-gate
+    name: CI 品質ゲート（workflows・policy_check・markdownlint）
+    since: "3.0.0"
+    paths: [".github/workflows/", "ci/policy_check.py", ".markdownlint.json"]
+    policy: always_update
+
+  - id: pre-pr-critical-review
+    name: PR 前批判レビュー・AI レビュー資材
+    since: "3.0.0"
+    paths: ["scripts/ai/", "scripts/run_ai_review.py"]
+    policy: always_update
+
+  - id: template-sync
+    name: テンプレート同期機構（本カタログ・マニフェスト・更新スクリプト・手順書）
+    since: "3.0.0"
+    paths: ["template-catalog.yml", ".template-update.yml", "scripts/template_update.py", "docs/TEMPLATE_CHANGELOG.md", "docs/UPGRADE_GUIDE.md", ".github/instructions/template-sync.instructions.md"]
+    policy: always_update
+
+  - id: governance-ledgers
+    name: 運用台帳の雛形（docs/ai の ledger 群）
+    since: "3.0.0"
+    paths: ["docs/ai/"]
+    policy: add_only

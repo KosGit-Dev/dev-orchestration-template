@@ -1,4 +1,6 @@
 {
+  // このファイルは VS Code + GitHub Copilot 向けの設定である（コンテナ環境非依存のローカル実行前提）。
+  // Claude Code のハーネス設定は .claude/settings.json（別ファイル）を正本とする。
   // ===== Copilot Agent Orchestration =====
   // サブエージェント機能を有効にする（実験的機能）
   "chat.customAgentInSubagent.enabled": true,

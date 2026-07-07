@@ -1,0 +1,86 @@
+# capability role とモデル解決の正本。
+# 層 1（恒久）: capability role と選択条件。モデル名を含まない。
+# 層 2（状態）: current_resolution のみ。プロバイダ固有モデル名を書いてよい場所は
+#   (a) 各ハーネス roster frontmatter の model:、(b) 本ファイルの current_resolution、
+#   (c) 歴史的記録（docs/ai/reviews/**・docs/ai/*-ledger.md・docs/audits/**）に限る。
+# 最新モデルの登場時に更新するのは current_resolution と roster frontmatter だけであり、
+# 恒久文書（入口 3 文書・agent 本文・ai/*.yml の説明文）は変更不要にする。
+
+schema_version: 1
+registry_name: ai-dev-template-capability-registry
+
+capability_roles:
+  primary_orchestrator:
+    logical_tier: top   # ai/operation-policy.yml subagent_delegation.model_tiering の論理 tier
+    responsibilities: [統括, 目的関数監査, 本質的問題分解, 設計判断, 計画立案, 批判的検証, 最終統合, ユーザー報告]
+    selection: その時点で利用可能な最上位の総合推論モデル（メイン会話のセッション model）
+  independent_peer_auditor:
+    logical_tier: high
+    independence: required   # primary と別 provider、または別推論系列
+    responsibilities: [PR 前の独立監査, 仕様変更前の独立監査, risk tier 上昇時の追加監査]
+    selection: primary からの独立性を満たす最上位監査モデル
+    fallback_ladder: >
+      L1=別 provider の最上位監査モデル / L2=同 provider の監査向け最上位
+      （harness-symmetric＝各ハーネスが自前で同等監査を実施する対称性）/
+      L3=標準モデル + 監査 scope 縮小 + 未検証リスク明記。
+      どの段で実施したかは review 証跡から機械判別可能にする。
+  release_judge:
+    logical_tier: high
+    responsibilities: [リリース判定（AC 逐条チェック・監査結果統合）]
+    selection: 高信頼判定モデル（roster release-manager）
+  security_auditor:
+    logical_tier: light   # パターン照合中心。設計を伴う監査は standard 以上へ昇格
+    responsibilities: [P-001 禁止操作, P-002 秘密情報, P-040 依存関係の監査]
+    escalation: 設計判断を含む監査は standard 以上で実施する
+  implementation_executor:
+    logical_tier: standard
+    responsibilities: [実装と関連 docs 更新, 複雑なテスト設計, 仕様・信頼性監査]
+  bulk_worker:
+    logical_tier: light
+    responsibilities: [探索, 抽出, 定型整形, 定型テスト, 証跡整形, 単ファイル局所編集]
+
+selection_criteria: # AND 評価。満たせない条件がある場合は縮退を decision-ledger へ 1 行記録する
+  - 可用性（ハーネスで実際に呼べるか。quota・billing・runner 状態を含む）
+  - 作業 risk tier（yellow / red は高 tier 側へ倒す。green は cost 優先を許容）
+  - 推論性能と監査適性（role の責務に対する十分性）
+  - context 長と tool / MCP / subagent 対応
+  - コストと rate limit
+  - 安全フィルタ・拒否リスク（監査系 role で過剰拒否が観測されたモデルは避ける）
+  - provider diversity と primary からの独立性（independent_peer_auditor のみ必須）
+
+resolution_rules:
+  model_name_locations: # プロバイダ固有モデル名を書いてよい場所（closed list）
+    - "各ハーネス roster frontmatter の model:（.claude/agents/*.md / .github/agents/*.agent.md）"
+    - "project-config.yml の ai_models（roster frontmatter の生成入力。update_agent_models.sh が展開）"
+    - "本ファイルの current_resolution"
+    - "歴史的記録（docs/ai/reviews/**・docs/ai/*-ledger.md・docs/audits/**）"
+  agent_body_rule: >
+    roster agent 本文（frontmatter 以外）にはプロバイダ固有モデル名を書かない。
+    選定理由は論理 tier / capability role 基準で書く。
+  harness_mechanisms: # 各プラットフォームの公式非固定機構に委ねる（独自のモデル切替実装を作らない）
+    claude_code: [世代非依存 model alias, subagent の model inherit, CLAUDE_CODE_SUBAGENT_MODEL 環境変数]
+    copilot: [auto_model_selection, custom agent frontmatter]
+    cursor: [auto_mode, 手動プール指定]
+    codex: [config.toml, reasoning effort 段階]
+  effort_rule: >
+    モデルを切り替えたら reasoning effort を再評価する。世代間の effort 正式対応表は
+    公式に存在しないため対応表をハードコードせず、各ハーネスの公式機構に委ねる。
+
+current_resolution:
+  # 状態記録（lock 相当・ポリシーではない）。更新は daily_development で行ってよい
+  # （decision-ledger へ 1 行記録）。以下は構造を示す汎用の初期値であり、実運用では各
+  # ハーネスで実際に解決した値へ更新する。
+  resolved_at: "未解決（bootstrap 後に更新）"
+  primary_orchestrator:
+    claude_code: セッション model（最上位エイリアス。利用不能時は次位エイリアスへ縮退し decision-ledger 記録）
+    copilot: auto_model_selection
+    cursor: auto
+    codex: 既定最上位モデル + effort high 以上
+  independent_peer_auditor:
+    preferred: 別 provider の最上位監査モデル
+    fallback_l2: 同 provider の監査向け最上位（harness-symmetric）
+    fallback_l3: 標準モデル + 監査 scope 縮小 + 未検証リスク明記
+  release_judge: roster release-manager の frontmatter に従う
+  security_auditor: roster auditor-security の frontmatter に従う
+  implementation_executor: roster implementer / auditor-spec / auditor-reliability の frontmatter に従う
+  bulk_worker: roster implementer-single-file / test-engineer の frontmatter に従う
