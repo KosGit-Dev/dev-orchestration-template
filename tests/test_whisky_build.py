@@ -54,6 +54,8 @@ def test_valid_question_passes() -> None:
         ({"level": "beginner"}, "level"),
         ({"answer": 4}, "answer"),
         ({"answer": "1"}, "answer"),
+        ({"answer": True}, "answer"),
+        ({"answer": False}, "answer"),
         ({"choices": ["a", "b", "c"]}, "choices"),
         ({"choices": ["a", "a", "b", "c"]}, "重複"),
         ({"explanation": ""}, "必須キー"),

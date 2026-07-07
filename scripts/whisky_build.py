@@ -48,8 +48,9 @@ def validate_question(q: dict, src: str) -> str | None:
         return f"不正な level: {q['level']}"
     if not isinstance(q["choices"], list) or len(q["choices"]) != 4:
         return "choices が4件でない"
-    if q["answer"] not in (0, 1, 2, 3):
-        return f"不正な answer: {q['answer']}"
+    # bool は int のサブクラスで (0,1,2,3) 判定を通過してしまうため型を明示的に弾く
+    if type(q["answer"]) is not int or q["answer"] not in (0, 1, 2, 3):
+        return f"不正な answer: {q['answer']!r}"
     if len({str(c).strip() for c in q["choices"]}) != 4:
         return "選択肢に重複がある"
     return None
