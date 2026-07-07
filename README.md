@@ -142,7 +142,6 @@ docs/
 │   └── copilot-code-review-instructions.md
 │
 ├── .agents/skills/                 # 第三者スキル（agmsg, stop-ai-slop-jp）
-├── .specify/                       # spec-kit 導入物
 ├── .cursor/                        # Cursor / Codex 向け設定
 │
 ├── ci/

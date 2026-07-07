@@ -10,6 +10,22 @@
 
 ---
 
+## [3.1.0] - 2026-07-07
+
+### 削除
+
+- Spec Kit 一式（`.specify/`・`.claude/skills/speckit-*` 14 件・`.github/agents/speckit.git.*` 5 件・
+  `.github/prompts/speckit.git.*` 5 件・`docs/spec-kit-bridge.md`）: 導入元プロジェクトが
+  「使用痕跡がなく agent/skill 二重管理のコストが上回る」としてユーザー承認のうえ全削除した判断
+  （2026-07-07）に追随。必要なプロジェクトは公式配布から個別導入する。
+
+### 変更
+
+- `template-catalog.yml`: spec-kit feature を除去し `template.version` を 3.1.0 へ更新。
+- `scripts/template_update.py` の `export`: 分類元をテンプレート側マニフェスト優先に変更（子リポジトリが apply 保護のためにローカルマニフェストを保守的にしても、逆反映の範囲が狭まらない）。
+- `ai/context-index.yml` / `.template-update.yml` / `scripts/ai/audit_document_inventory.py` /
+  `docs/agent-skills-integration.md` / `README.md` から Spec Kit 参照を除去。
+
 ## [3.0.0] - 2026-07-07
 
 AI 駆動開発環境（AI Operating Model・整合性駆動開発・orchestration・hooks・3ハーネス対称構成）を
