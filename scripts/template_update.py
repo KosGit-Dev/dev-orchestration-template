@@ -32,13 +32,17 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from importlib import import_module
 from pathlib import Path
+from typing import Any
 
-# PyYAML が利用できない環境への対策（簡易パーサーへフォールバック）
+# PyYAML が利用できない環境への対策（簡易パーサーへフォールバック）。
+# スタブ（types-PyYAML）の有無に依存せず mypy strict で安定させるため、
+# 動的 import で Any 型の変数に束縛する（レビュー指摘反映）。
 try:
-    import yaml
+    yaml: Any | None = import_module("yaml")
 except ImportError:  # pragma: no cover - 実行環境依存
-    yaml = None  # type: ignore[assignment]
+    yaml = None
 
 # ──────────────────────────────────────────────
 # 定数
@@ -121,7 +125,7 @@ def collect_files(directory: Path) -> list[str]:
 # ──────────────────────────────────────────────
 # マニフェスト / カタログ読み込み
 # ──────────────────────────────────────────────
-def load_manifest(manifest_path: Path) -> dict:
+def load_manifest(manifest_path: Path) -> dict[str, Any]:
     """.template-update.yml を読み込み全体の辞書を返す。"""
     if yaml is not None:
         with manifest_path.open(encoding="utf-8") as f:
@@ -133,7 +137,7 @@ def load_manifest(manifest_path: Path) -> dict:
     return _parse_manifest_simple(manifest_path)
 
 
-def get_categories(manifest: dict) -> dict[str, list[str]]:
+def get_categories(manifest: dict[str, Any]) -> dict[str, list[str]]:
     """マニフェスト辞書から categories を取り出す。"""
     categories = manifest.get("categories")
     if not isinstance(categories, dict):
@@ -142,10 +146,10 @@ def get_categories(manifest: dict) -> dict[str, list[str]]:
     return categories
 
 
-def _parse_manifest_simple(manifest_path: Path) -> dict:
+def _parse_manifest_simple(manifest_path: Path) -> dict[str, Any]:
     """PyYAML なしでマニフェストを簡易パースする。"""
     categories: dict[str, list[str]] = {}
-    result: dict = {"categories": categories}
+    result: dict[str, Any] = {"categories": categories}
     current_category: str | None = None
     text = manifest_path.read_text(encoding="utf-8")
 
@@ -177,7 +181,7 @@ def _parse_manifest_simple(manifest_path: Path) -> dict:
     return result
 
 
-def load_catalog(catalog_path: Path) -> dict | None:
+def load_catalog(catalog_path: Path) -> dict[str, Any] | None:
     """template-catalog.yml を読み込む。存在しなければ None。"""
     if not catalog_path.exists():
         return None
@@ -211,18 +215,18 @@ def _parse_inline_list(raw: str) -> list[str]:
     return items
 
 
-def _parse_catalog_simple(catalog_path: Path) -> dict:
+def _parse_catalog_simple(catalog_path: Path) -> dict[str, Any]:
     """PyYAML なしで template-catalog.yml を簡易パースする。
 
     template.* スカラーと features リスト（id / name / since / policy / paths）を抽出する。
     paths はインラインフローリスト記法（["a", "b"]）を前提とする。
     """
     template: dict[str, str] = {}
-    features: list[dict] = []
-    result: dict = {"template": template, "features": features}
+    features: list[dict[str, Any]] = []
+    result: dict[str, Any] = {"template": template, "features": features}
 
     section: str | None = None  # "template" | "features" | None
-    current_feature: dict | None = None
+    current_feature: dict[str, Any] | None = None
     text = catalog_path.read_text(encoding="utf-8")
 
     for raw_line in text.splitlines():
@@ -308,7 +312,7 @@ def classify_file(rel_path: str, categories: dict[str, list[str]]) -> str:
     return best_category
 
 
-def cross_check_catalog(categories: dict[str, list[str]], catalog: dict | None) -> None:
+def cross_check_catalog(categories: dict[str, list[str]], catalog: dict[str, Any] | None) -> None:
     """template-catalog.yml の features[].policy と manifest 分類の整合を検査する。
 
     矛盾があれば警告を表示する（処理は継続する）。
@@ -370,7 +374,7 @@ def clone_template(template_url: str, dest: Path) -> str:
     return result.stdout.strip()
 
 
-def read_local_version(project_dir: Path) -> dict:
+def read_local_version(project_dir: Path) -> dict[str, Any]:
     """.template-version.yml を読む。無ければ空辞書（未適用）。"""
     version_path = project_dir / VERSION_FILE
     if not version_path.exists():
@@ -655,7 +659,7 @@ def cmd_check(args: argparse.Namespace, project_dir: Path) -> int:
         remote = parse_semver(remote_version)
         current = parse_semver(applied_version) if applied_version else None
 
-        if applied_version and remote <= current:
+        if applied_version and current is not None and remote <= current:
             print("\n最新です。アップデートは不要です。")
             return EXIT_OK
 

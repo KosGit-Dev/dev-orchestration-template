@@ -92,7 +92,9 @@
 5. 入口ファイル・`project-config.yml` の手動取り込み（任意）。
    `CLAUDE.md` / `AGENTS.md` / `.github/copilot-instructions.md` / `.claude/settings.json` は
    `add_only`（既存は保護）のため自動更新されない。改善を取り込みたい場合は
-   `docs/UPGRADE_GUIDE.md` の手順に従い、手動 diff で必要な差分だけ反映する。
+   check の差分レポートを基に、一時 clone のテンプレート側ファイルとの手動 diff で
+   必要な差分だけ反映する（`docs/UPGRADE_GUIDE.md` を同梱しているリポジトリでは
+   同ガイドの該当手順も参照できる）。
 
 6. 変更を確認してコミットする（利用者の指示があれば push）。
 
