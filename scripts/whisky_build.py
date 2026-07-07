@@ -33,9 +33,14 @@ def read_jsonl(path: Path) -> list[dict]:
         if not line:
             continue
         try:
-            items.append(json.loads(line))
+            obj = json.loads(line)
         except json.JSONDecodeError as e:
             print(f"  WARN {path.name}:{i + 1} JSON エラーのため行を除外: {e}")
+            continue
+        if not isinstance(obj, dict):
+            print(f"  WARN {path.name}:{i + 1} オブジェクト以外の行を除外: {type(obj).__name__}")
+            continue
+        items.append(obj)
     return items
 
 

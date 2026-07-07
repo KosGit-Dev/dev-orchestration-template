@@ -80,3 +80,10 @@ def test_read_jsonl_skips_broken_lines(tmp_path: Path) -> None:
     p.write_text('{"a": 1}\nこれはJSONではない\n\n{"b": 2},\n', encoding="utf-8")
     items = wb.read_jsonl(p)
     assert items == [{"a": 1}, {"b": 2}]
+
+
+def test_read_jsonl_skips_non_dict_lines(tmp_path: Path) -> None:
+    p = tmp_path / "x.jsonl"
+    p.write_text('{"a": 1}\n[]\n"x"\n1\nnull\n{"b": 2}\n', encoding="utf-8")
+    items = wb.read_jsonl(p)
+    assert items == [{"a": 1}, {"b": 2}]

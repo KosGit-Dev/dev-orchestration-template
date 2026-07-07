@@ -8,7 +8,7 @@ const ASSETS = [
   './js/sensory.js', './js/essay.js', './js/stats.js', './js/app.js',
   './data/worldmap.js', './data/questions.js', './data/essays.js',
   './data/mapdata.js', './data/sensory.js',
-  './icons/icon-192.png', './icons/icon-512.png',
+  './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png',
 ];
 
 self.addEventListener('install', (e) => {
