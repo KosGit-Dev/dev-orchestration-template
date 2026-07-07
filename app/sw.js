@@ -1,5 +1,5 @@
-/* オフライン対応 Service Worker: 全アセットをプリキャッシュする（キャッシュファースト） */
-const CACHE = 'wcq-v1';
+/* オフライン対応 Service Worker: プリキャッシュ + stale-while-revalidate（GET） */
+const CACHE = 'wcq-v2';
 const ASSETS = [
   './index.html',
   './manifest.webmanifest',
@@ -23,8 +23,20 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+/* キャッシュを即返しつつ、裏で取得してキャッシュを更新する（次回訪問時に最新化） */
 self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request, { ignoreSearch: true }).then((hit) => hit || fetch(e.request))
+    caches.open(CACHE).then((cache) =>
+      cache.match(e.request, { ignoreSearch: true }).then((hit) => {
+        const refresh = fetch(e.request)
+          .then((res) => {
+            if (res && res.ok) cache.put(e.request, res.clone());
+            return res;
+          })
+          .catch(() => hit); // オフライン時はキャッシュで継続
+        return hit || refresh;
+      })
+    )
   );
 });

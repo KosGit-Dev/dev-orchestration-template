@@ -25,6 +25,15 @@ DIST = ROOT / "release"
 LEVELS = {"expert", "professional", "master"}
 Q_REQUIRED = ("id", "level", "category", "question", "choices", "answer", "explanation")
 
+# 生成エージェントがスキーマ外カテゴリを使った場合の正規化（苦手分析の分類を安定させる）
+CAT_ALIASES = {
+    "aroma": "tasting",
+    "fault": "tasting",
+    "flavor_wheel": "tasting",
+    "evaluation": "tasting",
+    "color": "tasting",
+}
+
 
 def read_jsonl(path: Path) -> list[dict]:
     items = []
@@ -70,6 +79,7 @@ def build_questions() -> list[dict]:
     for f in files:
         n_ok = 0
         for q in read_jsonl(f):
+            q["category"] = CAT_ALIASES.get(q.get("category"), q.get("category"))
             reason = validate_question(q, f.name)
             if reason:
                 print(f"  WARN {f.name} {q.get('id', '?')} 除外: {reason}")
@@ -94,6 +104,7 @@ def build_questions() -> list[dict]:
         n_ok = 0
         for q in sen.get("questions", []):
             q.setdefault("category", "tasting")
+            q["category"] = CAT_ALIASES.get(q.get("category"), q.get("category"))
             q.setdefault("domain", "sen")
             reason = validate_question(q, "sensory.json")
             if reason or q["id"] in seen_ids:
