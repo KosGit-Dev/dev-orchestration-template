@@ -29,6 +29,12 @@
       return U.sample(qs, Math.min(count || 10, qs.length));
     },
 
+    regions(regionList, count) {
+      const set = new Set(regionList);
+      const qs = pool().filter((q) => set.has(q.region));
+      return U.sample(qs, Math.min(count || 10, qs.length));
+    },
+
     review(count) {
       const st = U.Store.get();
       const set = new Set(st.wrongSet);

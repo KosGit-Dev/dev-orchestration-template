@@ -1,14 +1,14 @@
 /* オフライン対応 Service Worker: プリキャッシュ + stale-while-revalidate（GET） */
-const CACHE = 'wcq-v3';
+const CACHE = 'wcq-v4';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './css/style.css',
-  './js/util.js', './js/storage.js', './js/quiz.js', './js/map.js',
+  './js/util.js', './js/mapmeta.js', './js/storage.js', './js/quiz.js', './js/map.js',
   './js/sensory.js', './js/essay.js', './js/stats.js', './js/app.js',
-  './data/worldmap.js', './data/questions.js', './data/essays.js',
-  './data/mapdata.js', './data/sensory.js',
+  './data/worldmap.js', './data/areamaps.js', './data/questions.js', './data/essays.js',
+  './data/areas.js', './data/sensory.js',
   './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png',
 ];
 

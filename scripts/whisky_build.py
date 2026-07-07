@@ -138,6 +138,68 @@ def build_essays() -> list[dict]:
     return essays
 
 
+AREA_ORDER = [
+    "scotland",
+    "ireland",
+    "england-wales",
+    "europe",
+    "usa",
+    "canada",
+    "japan",
+    "taiwan",
+    "india",
+    "australia",
+]
+ERAS = {"origins", "smuggling", "industrial", "crisis", "renaissance"}
+ICONS = {
+    "scroll", "still", "barrel", "ship", "factory", "law",
+    "fire", "trophy", "glass", "crown", "train", "globe",
+}  # fmt: skip
+
+
+def build_areas() -> None:
+    """raw/areas/*.json を検証して data/areas.js へ統合する。"""
+    areas = []
+    src_dir = RAW / "areas"
+    if not src_dir.exists():
+        return
+    for area_id in AREA_ORDER:
+        p = src_dir / f"{area_id}.json"
+        if not p.exists():
+            print(f"  WARN エリアパック未着: {area_id}")
+            continue
+        a = json.loads(p.read_text(encoding="utf-8"))
+        ok_tl = []
+        for ev in a.get("timeline", []):
+            if not isinstance(ev.get("year"), int) or not ev.get("title"):
+                print(f"  WARN {area_id} timeline 不正イベントを除外: {ev.get('title')}")
+                continue
+            if ev.get("era") not in ERAS:
+                ev["era"] = "origins" if ev["year"] < 1700 else "renaissance"
+            if ev.get("icon") not in ICONS:
+                ev["icon"] = "scroll"
+            ok_tl.append(ev)
+        a["timeline"] = sorted(ok_tl, key=lambda e: e["year"])
+        ok_d = []
+        for d in a.get("distilleries", []):
+            if not d.get("id") or not isinstance(d.get("lat"), (int, float)):
+                print(f"  WARN {area_id} distillery 不正のため除外: {d.get('name')}")
+                continue
+            ok_d.append(d)
+        a["distilleries"] = ok_d
+        areas.append(a)
+    if areas:
+        n_tl = sum(len(a["timeline"]) for a in areas)
+        n_d = sum(len(a["distilleries"]) for a in areas)
+        print(f"エリアパック: {len(areas)}産地 / 年表{n_tl}件 / 蒸留所{n_d}箇所")
+        write_js(
+            APP / "data" / "areas.js",
+            "WCQ_AREAS",
+            {"areas": areas},
+            "生成物: scripts/whisky_build.py（産地エリアパック統合）",
+        )
+
+
 def write_js(path: Path, var: str, data: object, header: str) -> None:
     body = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     path.write_text(f"// {header}\nwindow.{var} = {body};\n", encoding="utf-8")
@@ -168,16 +230,7 @@ def integrate() -> None:
             "生成物: scripts/whisky_build.py（論文テーマ統合）",
         )
 
-    map_path = RAW / "map.json"
-    if map_path.exists():
-        m = json.loads(map_path.read_text(encoding="utf-8"))
-        print(f"地図ポイント: {len(m.get('points', []))}箇所")
-        write_js(
-            APP / "data" / "mapdata.js",
-            "WCQ_MAP",
-            m,
-            "生成物: scripts/whisky_build.py（地図データ）",
-        )
+    build_areas()
 
     sen_path = RAW / "sensory.json"
     if sen_path.exists():

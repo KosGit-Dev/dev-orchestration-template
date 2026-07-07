@@ -268,30 +268,141 @@ h1, h2, h3, .hero h2, .mode-title {
 .wrong-a { font-size: 13px; color: var(--ok); margin-top: 4px; }
 .wrong-e { font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
 
-/* ---- 地図 ---- */
+/* ---- 地図 v2 ---- */
 
-.map-jumps { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px; scrollbar-width: none; }
-.map-jumps::-webkit-scrollbar { display: none; }
 .map-frame {
   position: relative; border-radius: var(--radius); overflow: hidden;
   border: 1px solid var(--line); box-shadow: var(--shadow);
   touch-action: none; background: #0e131c;
 }
-#map-svg { display: block; width: 100%; height: min(62vh, 520px); }
+#map-svg { display: block; width: 100%; height: min(66vh, 560px); }
+.area-frame #map-svg { height: min(52vh, 460px); }
 .map-sea { fill: #0e131c; }
 .map-land { fill: #2a2418; stroke: rgba(224, 162, 78, 0.28); stroke-width: 0.5; }
-.map-dot { fill: var(--accent); stroke: #140f08; stroke-width: 0.8; }
-.map-pt.kind-region .map-dot { fill: #e8c268; }
-.map-pt.kind-landmark .map-dot { fill: #b8977a; }
-.map-pt.seen .map-dot { fill: #8a6a33; }
-.map-hit { fill: transparent; cursor: pointer; }
-.map-pt { cursor: pointer; }
+.area-land { stroke-width: 0.12; }
 .map-label { fill: var(--ink-2); paint-order: stroke; stroke: rgba(10, 8, 4, 0.85); stroke-width: 2px; font-family: inherit; pointer-events: none; }
 .map-hint {
   position: absolute; left: 10px; bottom: 10px; font-size: 10.5px; color: var(--ink-3);
   background: rgba(14, 11, 6, 0.7); border-radius: 8px; padding: 4px 10px; pointer-events: none;
 }
-.map-progress { font-size: 12px; color: var(--ink-3); margin: 10px 4px; }
+.map-zoom { position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.map-zoom .icon-btn { background: rgba(20, 15, 8, 0.8); font-size: 17px; }
+
+/* 世界ビュー: 塗りエリア */
+.w-blob { cursor: pointer; }
+.w-label {
+  font-family: Georgia, "Hiragino Mincho ProN", serif; font-weight: 600; letter-spacing: 0.06em;
+  paint-order: stroke; stroke: rgba(10, 8, 4, 0.9); stroke-width: 2.6px; pointer-events: none;
+}
+.w-sublabel { fill: var(--ink-3); paint-order: stroke; stroke: rgba(10, 8, 4, 0.85); stroke-width: 2px; pointer-events: none; }
+.area-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.area-chip { border-color: color-mix(in srgb, var(--ac) 55%, transparent); color: var(--ac); }
+
+/* エリア詳細ビュー */
+.area-title h2 { font-size: 20px; color: var(--ac); }
+.area-tagline { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+.sub-zone { fill: var(--sc); fill-opacity: 0.16; stroke: var(--sc); stroke-opacity: 0.55; stroke-width: 0.3; stroke-dasharray: 1.2 0.9; }
+.sub-label { font-family: inherit; font-weight: 600; paint-order: stroke; stroke: rgba(10, 8, 4, 0.9); stroke-width: 1.6px; pointer-events: none; }
+.a-pin { cursor: pointer; }
+.pin-dot { stroke: rgba(10, 8, 4, 0.9); stroke-width: 0.4; }
+.area-actions { display: flex; gap: 8px; margin: 12px 0 4px; flex-wrap: wrap; }
+.area-actions .btn { flex: 1; min-width: 150px; text-align: center; }
+.sub-chips { margin: 10px 0 4px; }
+.sub-chips .chip { border-color: color-mix(in srgb, var(--ac) 50%, transparent); color: var(--ac); }
+
+.area-bg-card { border-left: 3px solid var(--ac); }
+.area-bg { max-height: 7.5em; overflow: hidden; transition: max-height 0.3s; position: relative; }
+.area-bg.expanded { max-height: 300em; }
+.area-bg p { color: var(--ink-2); font-size: 14px; line-height: 1.9; margin-bottom: 10px; }
+.read-more { background: none; border: none; color: var(--accent); font-size: 13px; cursor: pointer; padding: 6px 0 0; font-family: inherit; }
+
+.dist-row {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: none; border: none; border-bottom: 1px dashed var(--line);
+  padding: 11px 2px; color: var(--ink); font-family: inherit; font-size: 14px; cursor: pointer;
+}
+.dist-row:last-child { border-bottom: none; }
+.dist-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.dist-name { flex: 1; }
+.dist-name small { display: block; color: var(--ink-3); font-size: 10.5px; letter-spacing: 0.04em; }
+.dist-founded { color: var(--ink-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+.dist-seen { color: var(--ok); width: 16px; }
+.dist-en { font-size: 12px; color: var(--ink-3); font-weight: 400; }
+.sheet-label { font-size: 11px; letter-spacing: 0.12em; color: var(--ink-3); margin: 12px 0 6px; }
+.bottle-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.bottle { background: rgba(224, 162, 78, 0.1); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: 12.5px; color: var(--ink-2); }
+.trivia-box {
+  margin-top: 12px; background: rgba(125, 201, 138, 0.07); border: 1px dashed rgba(125, 201, 138, 0.35);
+  border-radius: 12px; padding: 10px 12px; font-size: 13px; color: var(--ink-2);
+}
+.trivia-mark { display: inline-block; color: var(--ok); font-weight: 700; font-size: 11px; margin-right: 8px; letter-spacing: 0.08em; }
+
+/* スクロール年表 */
+.no-scroll { overflow: hidden; }
+.tl-overlay {
+  position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column;
+  background:
+    radial-gradient(900px 400px at 90% -5%, color-mix(in srgb, var(--ac) 14%, transparent), transparent 60%),
+    var(--bg);
+}
+.tl-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  padding: calc(12px + env(safe-area-inset-top)) 18px 10px; border-bottom: 1px solid var(--line);
+}
+.tl-kicker { font-size: 10px; letter-spacing: 0.3em; color: var(--ac); }
+.tl-head h2 { font-size: 18px; }
+.tl-era-banner {
+  display: flex; align-items: baseline; gap: 10px; padding: 9px 18px;
+  background: color-mix(in srgb, var(--ec, #8a7b5c) 16%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--ec, #8a7b5c) 40%, transparent);
+  transition: background 0.5s, border-color 0.5s;
+}
+.tl-era-name { font-weight: 700; font-size: 13.5px; color: var(--ec, var(--ink)); transition: color 0.5s; font-family: Georgia, "Hiragino Mincho ProN", serif; }
+.tl-era-desc { font-size: 11.5px; color: var(--ink-3); }
+.tl-scroll { flex: 1; overflow-y: auto; position: relative; padding: 20px 16px 40px; }
+.tl-spine {
+  position: absolute; top: 0; bottom: 0; left: 38px; width: 2px;
+  background: linear-gradient(180deg, #8a7b5c, #7d6f9e 25%, #c47b1e 50%, #a05252 72%, #6fae7d);
+  opacity: 0.55;
+}
+.tl-event {
+  position: relative; display: flex; gap: 14px; margin: 0 0 22px; padding-left: 6px;
+  opacity: 0; transform: translateY(18px); transition: opacity 0.5s, transform 0.5s;
+}
+.tl-event.shown { opacity: 1; transform: none; }
+.tl-node {
+  flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--surface); border: 2px solid var(--ec); color: var(--ec);
+  position: relative; z-index: 1; margin-left: 5px; box-shadow: 0 0 12px color-mix(in srgb, var(--ec) 35%, transparent);
+}
+.tl-card {
+  flex: 1; background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  border: 1px solid color-mix(in srgb, var(--ec) 30%, var(--line));
+  border-radius: 14px; padding: 12px 14px;
+}
+.tl-year {
+  font-family: Georgia, serif; font-size: 20px; font-weight: 700; color: var(--ec);
+  display: flex; align-items: center; gap: 10px; font-variant-numeric: tabular-nums;
+}
+.tl-era-tag { font-size: 10px; color: var(--ink-3); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; font-family: inherit; font-weight: 400; }
+.tl-card h4 { font-size: 14.5px; margin: 4px 0 4px; }
+.tl-card p { font-size: 13px; color: var(--ink-2); line-height: 1.75; }
+.tl-end { text-align: center; padding: 24px 0 40px; color: var(--ink-3); font-size: 13px; }
+.tl-end .btn { margin-top: 12px; }
+
+@media (min-width: 640px) {
+  .tl-scroll { padding-left: 0; padding-right: 0; }
+  .tl-spine { left: 50%; }
+  .tl-event { width: 50%; padding-right: 30px; }
+  .tl-event .tl-card { order: -1; }
+  .tl-event .tl-node { margin-left: 0; transform: translateX(50%); }
+  .tl-event.shown .tl-node { transform: translateX(50%); }
+  .tl-event.alt { margin-left: 50%; padding-right: 0; padding-left: 30px; }
+  .tl-event.alt .tl-card { order: 1; }
+  .tl-event.alt .tl-node { transform: translateX(-50%); }
+  .tl-event.alt.shown .tl-node { transform: translateX(-50%); }
+  .tl-event { margin-bottom: 6px; }
+}
 
 .sheet {
   position: fixed; left: 50%; transform: translateX(-50%);

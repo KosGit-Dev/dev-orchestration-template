@@ -45,6 +45,12 @@
         questions: U.Quiz.Builders.region(region, 10),
       });
     },
+    regions(regionList, label) {
+      startQuiz({
+        mode: 'region', title: label,
+        questions: U.Quiz.Builders.regions(regionList, 10),
+      });
+    },
     review() {
       startQuiz({ mode: 'review', title: '復習', questions: U.Quiz.Builders.review() });
     },
@@ -200,7 +206,8 @@
     v.scrollTop = 0;
     window.scrollTo(0, 0);
     if (name === 'home' || name === '') renderHome();
-    else if (name === 'map') U.MapMode.render(v, (region, label) => Launch.region(region, label));
+    else if (name === 'map') U.MapMode.render(v, {}, (regions, label) => Launch.regions(regions, label));
+    else if (name.startsWith('map/')) U.MapMode.render(v, { area: name.slice(4) }, (regions, label) => Launch.regions(regions, label));
     else if (name === 'quiz') renderQuizSetup();
     else if (name === 'sensory') U.Sensory.renderHome(v, (kind) => Launch.sensory(kind));
     else if (name === 'essay') U.Essay.renderList(v, (id) => { location.hash = `#essay/${id}`; });
