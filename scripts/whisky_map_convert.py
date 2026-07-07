@@ -62,6 +62,9 @@ def ring_to_path(ring: list[list[float]]) -> str | None:
 
 
 def main() -> None:
+    if len(sys.argv) != 3:
+        print("usage: whisky_map_convert.py <input.geojson> <output.js>", file=sys.stderr)
+        raise SystemExit(2)
     src, dst = sys.argv[1], sys.argv[2]
     with open(src, encoding="utf-8") as f:
         gj = json.load(f)

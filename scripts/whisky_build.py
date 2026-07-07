@@ -186,6 +186,8 @@ def build_dist() -> None:
 
     def inline_js(match: re.Match) -> str:
         js = (APP / match.group(1)).read_text(encoding="utf-8")
+        # データ文字列中の </script> が HTML を分断しないようエスケープ（JS 文字列では \/ == /）
+        js = js.replace("</script", "<\\/script")
         return f"<script>\n{js}\n</script>"
 
     html = re.sub(r'<link rel="stylesheet" href="([^"]+)">', inline_css, html)

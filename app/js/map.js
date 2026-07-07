@@ -68,7 +68,7 @@
         const label = showLabels
           ? `<text x="${xy.x + r * 1.6}" y="${xy.y + r * 0.6}" class="map-label" font-size="${Math.max(3.4, 11 * scale * 2.2)}">${U.esc(p.name)}</text>` : '';
         return `<g class="${cls}" data-id="${U.esc(p.id)}">
-          <circle cx="${xy.x}" cy="${xy.y}" r="${r * 2.2}" class="map-hit"/>
+          <circle cx="${xy.x}" cy="${xy.y}" r="${r * 1.7}" class="map-hit"/>
           <circle cx="${xy.x}" cy="${xy.y}" r="${r}" class="map-dot"/>
           ${label}</g>`;
       }).join('');
