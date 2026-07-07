@@ -1,0 +1,15 @@
+{
+  "name": "ウイスキーコニサー道場",
+  "short_name": "コニサー道場",
+  "description": "ウイスキーコニサー資格認定試験（エキスパート/プロフェッショナル/マスター・オブ・ウイスキー）対策の学習アプリ",
+  "lang": "ja",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#141009",
+  "theme_color": "#141009",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

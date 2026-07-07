@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#141009">
+<title>ウイスキーコニサー道場</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="app-header">
+  <span class="logo">🥃</span>
+  <h1>ウイスキーコニサー道場</h1>
+  <span class="header-sub">Whisky Connoisseur Dojo</span>
+</header>
+<main id="view"></main>
+<nav class="bottom-nav"></nav>
+
+<script src="data/worldmap.js"></script>
+<script src="data/questions.js"></script>
+<script src="data/essays.js"></script>
+<script src="data/mapdata.js"></script>
+<script src="data/sensory.js"></script>
+
+<script src="js/util.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/quiz.js"></script>
+<script src="js/map.js"></script>
+<script src="js/sensory.js"></script>
+<script src="js/essay.js"></script>
+<script src="js/stats.js"></script>
+<script src="js/app.js"></script>
+<script>
+// http(s) 配信時のみ Service Worker を登録する（file:// や単一ファイル版では不要）
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(function () { /* オフライン機能なしで継続 */ });
+}
+</script>
+</body>
+</html>
