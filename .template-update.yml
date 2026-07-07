@@ -38,7 +38,6 @@ categories:
     # エージェントスキル（agmsg / stop-ai-slop-jp の実体）
     - .agents/
     # Spec Kit 導入物
-    - .specify/
     # Hook スクリプト実体と AI レビュー資材
     - scripts/hooks/
     - scripts/ai/
@@ -84,7 +83,6 @@ categories:
     - docs/security-policy-template.md
     - docs/orchestration.md
     - docs/hooks-guide.md
-    - docs/spec-kit-bridge.md
     - docs/agent-skills-integration.md
     # テンプレート基盤の hook テスト（プロジェクト側の hook 動作を保証）
     - tests/test_instruction_source.py

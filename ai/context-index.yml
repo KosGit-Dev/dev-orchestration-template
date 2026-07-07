@@ -86,7 +86,6 @@ modes:
       - .claude/**/*.md
       - docs/**/*.md
       - ai/**/*.yml
-      - .specify/**
 
 never_read_by_default:
   - docs/archive/**

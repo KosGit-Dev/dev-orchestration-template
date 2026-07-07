@@ -45,16 +45,6 @@ def classify(path: Path) -> tuple[str, str, str, bool]:
         )
     if s.startswith(".claude/output-styles/"):
         return "AGENT_SPECIFIC", "keep", "行動仕様の Claude Code 写像（output style）", False
-    # Skills / MCP allowlist: keep は agmsg / stop-ai-slop-jp のみ。
-    # speckit 群は外部由来（Spec Kit）で vetting 未了かつ agent/skill 二重管理のため
-    # VENDOR_REVIEW_REQUIRED（削除判断は人間承認を挟む・初回は分類のみ）
-    if s.startswith((".claude/skills/speckit-", ".github/agents/speckit.git.")):
-        return (
-            "VENDOR_REVIEW_REQUIRED",
-            "review",
-            "外部由来（Spec Kit）・vetting 未了・二重管理",
-            False,
-        )
     if s.startswith((".agents/skills/agmsg/", ".agents/skills/stop-ai-slop-jp/")):
         return "AGENT_SPECIFIC", "keep", "Skills allowlist（共通正本）", False
     if s.startswith((".claude/skills/agmsg", ".claude/skills/stop-ai-slop-jp")):

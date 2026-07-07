@@ -32,20 +32,6 @@
 | .claude/agents/release-manager.md | AGENT_SPECIFIC | keep | エージェント定義 | no |
 | .claude/agents/test-engineer.md | AGENT_SPECIFIC | keep | エージェント定義 | no |
 | .claude/output-styles/orchestrator-behavior.md | AGENT_SPECIFIC | keep | 行動仕様の Claude Code 写像（output style） | no |
-| .claude/skills/speckit-analyze/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .claude/skills/speckit-checklist/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .claude/skills/speckit-clarify/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .claude/skills/speckit-constitution/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .claude/skills/speckit-git-commit/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .claude/skills/speckit-git-feature/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .claude/skills/speckit-git-initialize/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .claude/skills/speckit-git-remote/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .claude/skills/speckit-git-validate/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .claude/skills/speckit-implement/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .claude/skills/speckit-plan/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .claude/skills/speckit-specify/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .claude/skills/speckit-tasks/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .claude/skills/speckit-taskstoissues/SKILL.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
 | .github/PULL_REQUEST_TEMPLATE.md | REFERENCE | review | 手動または AI による分類精査が必要 | no |
 | .github/agents/auditor-reliability.agent.md | AGENT_SPECIFIC | keep | エージェント定義 | no |
 | .github/agents/auditor-security.agent.md | AGENT_SPECIFIC | keep | エージェント定義 | no |
@@ -55,11 +41,6 @@
 | .github/agents/orchestrator.agent.md | AGENT_SPECIFIC | keep | エージェント定義 | no |
 | .github/agents/pre-pr-critical-reviewer.agent.md | AGENT_SPECIFIC | keep | エージェント定義 | no |
 | .github/agents/release-manager.agent.md | AGENT_SPECIFIC | keep | エージェント定義 | no |
-| .github/agents/speckit.git.commit.agent.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .github/agents/speckit.git.feature.agent.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .github/agents/speckit.git.initialize.agent.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .github/agents/speckit.git.remote.agent.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
-| .github/agents/speckit.git.validate.agent.md | VENDOR_REVIEW_REQUIRED | review | 外部由来（Spec Kit）・vetting 未了・二重管理 | no |
 | .github/agents/test-engineer.agent.md | AGENT_SPECIFIC | keep | エージェント定義 | no |
 | .github/copilot-code-review-instructions.md | REFERENCE | review | 手動または AI による分類精査が必要 | no |
 | .github/copilot-instructions.md | AGENT_SPECIFIC | revise | ツール別入口。薄く保つ | yes |
@@ -73,11 +54,6 @@
 | .github/prompts/AUDIT_SPEC.prompt.md | ARCHIVE | move_or_keep_out_of_default_context | 一回限りプロンプト素材 | no |
 | .github/prompts/EXECUTE.prompt.md | ARCHIVE | move_or_keep_out_of_default_context | 一回限りプロンプト素材 | no |
 | .github/prompts/FINAL_REVIEW.prompt.md | ARCHIVE | move_or_keep_out_of_default_context | 一回限りプロンプト素材 | no |
-| .github/prompts/speckit.git.commit.prompt.md | ARCHIVE | move_or_keep_out_of_default_context | 一回限りプロンプト素材 | no |
-| .github/prompts/speckit.git.feature.prompt.md | ARCHIVE | move_or_keep_out_of_default_context | 一回限りプロンプト素材 | no |
-| .github/prompts/speckit.git.initialize.prompt.md | ARCHIVE | move_or_keep_out_of_default_context | 一回限りプロンプト素材 | no |
-| .github/prompts/speckit.git.remote.prompt.md | ARCHIVE | move_or_keep_out_of_default_context | 一回限りプロンプト素材 | no |
-| .github/prompts/speckit.git.validate.prompt.md | ARCHIVE | move_or_keep_out_of_default_context | 一回限りプロンプト素材 | no |
 | AGENTS.md | AGENT_SPECIFIC | revise | ツール別入口。薄く保つ | yes |
 | CLAUDE.md | AGENT_SPECIFIC | revise | ツール別入口。薄く保つ | yes |
 | ai/capability-registry.yml | CORE_CONTROL | keep | AI 制御面 | yes |
@@ -116,4 +92,3 @@
 | docs/requirements.md | DOMAIN_SSOT | keep | ドメイン正本 | no |
 | docs/runbook.md | DOMAIN_SSOT | keep | ドメイン正本 | no |
 | docs/security-policy-template.md | REFERENCE | review | 手動または AI による分類精査が必要 | no |
-| docs/spec-kit-bridge.md | REFERENCE | review | 手動または AI による分類精査が必要 | no |

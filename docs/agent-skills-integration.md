@@ -19,7 +19,7 @@ skill / MCP の keep 対象は次の 3 点のみとする。新規追加は vett
 | agmsg | skill | エージェント間相談・監査依頼の標準経路 |
 | serena | MCP | src/ 変更時の参照元追跡 |
 
-speckit-* skill 14 件と `.github/agents/speckit.git.*` 5 件は外部由来（Spec Kit 導入）で使用痕跡がなく、VENDOR_REVIEW_REQUIRED として棚卸しに分類済み（削除判断は人間承認を挟む）。
+Spec Kit（speckit-* skill 群）は使用痕跡がなく二重管理コストが上回るため、v3.1.0 で本テンプレートから削除した（導入元プロジェクトの削除判断に追随）。必要なプロジェクトは公式配布から個別導入する。
 
 ## 調査結果
 

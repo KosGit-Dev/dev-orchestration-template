@@ -18,7 +18,7 @@ template:
   name: ai-dev-template
   display_name: AI駆動開発テンプレート
   repository: https://github.com/KosGit-Dev/dev-orchestration-template.git
-  version: "3.0.0"
+  version: "3.1.0"
 
 features:
   - id: ai-operating-model
@@ -57,16 +57,10 @@ features:
     paths: [".agents/"]
     policy: always_update
 
-  - id: spec-kit
-    name: Spec Kit 導入物（.specify 一式）
-    since: "3.0.0"
-    paths: [".specify/"]
-    policy: always_update
-
   - id: governance-docs
     name: 運用・設計ガイド文書（テンプレート共通）
     since: "3.0.0"
-    paths: ["docs/orchestration.md", "docs/hooks-guide.md", "docs/spec-kit-bridge.md", "docs/agent-skills-integration.md", "docs/quality-guide.md", "docs/observability-guide.md", "docs/security-policy-template.md", "docs/GETTING_STARTED.md", "docs/MODE_GUIDE.md"]
+    paths: ["docs/orchestration.md", "docs/hooks-guide.md", "docs/agent-skills-integration.md", "docs/quality-guide.md", "docs/observability-guide.md", "docs/security-policy-template.md", "docs/GETTING_STARTED.md", "docs/MODE_GUIDE.md"]
     policy: always_update
 
   - id: ci-quality-gate
