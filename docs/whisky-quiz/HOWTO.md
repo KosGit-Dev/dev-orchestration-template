@@ -48,11 +48,10 @@
 
 ### 方法B: Web にホストして PWA として使う（iPhone に最適）
 
-`app/` ディレクトリを任意の静的ホスティングに置く。GitHub Pages なら:
+GitHub Pages への自動デプロイを同梱している（`.github/workflows/deploy-pages.yml`）。`app/` に変更を push するたびに `https://<owner>.github.io/<repo>/` へ公開される。private リポジトリで Pages が使えないプランの場合は、リポジトリを public にするか、任意の静的ホスティング（Netlify、Cloudflare Pages 等）に `app/` を置く。
 
-1. GitHub のリポジトリ設定 → Pages → Branch を選び、公開ディレクトリを `app/`（または docs 化）にする。
-2. 公開 URL を iPhone の Safari で開く。
-3. 共有ボタン →「ホーム画面に追加」。アイコン付きでフルスクリーン起動し、Service Worker により**オフラインでも動く**。
+1. 公開 URL を iPhone の Safari で開く。
+2. 共有ボタン →「ホーム画面に追加」。アイコン付きでフルスクリーン起動し、Service Worker により**オフラインでも動く**。
 
 URL を渡すだけで誰にでも配れる。もっとも「アプリらしい」体験。
 

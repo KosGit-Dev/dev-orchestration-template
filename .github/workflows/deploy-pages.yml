@@ -1,0 +1,45 @@
+# ウイスキーコニサー道場（app/）を GitHub Pages へ公開する。
+# 初回実行時に configure-pages が Pages を自動有効化する（enablement: true）。
+# 公開 URL は https://<owner>.github.io/<repo>/
+name: Deploy Pages
+
+on:
+  push:
+    branches: [master, claude/whiskey-exam-game-f1dx9h]
+    paths:
+      - "app/**"
+      - ".github/workflows/deploy-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Configure Pages（未有効なら有効化）
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
+        with:
+          enablement: true
+
+      - name: Upload app/ as Pages artifact
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        with:
+          path: app
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
