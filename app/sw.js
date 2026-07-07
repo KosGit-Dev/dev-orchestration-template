@@ -34,7 +34,11 @@ self.addEventListener('fetch', (e) => {
             if (res && res.ok) cache.put(e.request, res.clone());
             return res;
           })
-          .catch(() => hit); // オフライン時はキャッシュで継続
+          // オフライン時はキャッシュで継続。未ヒットなら 503 を返す（respondWith は Response 必須）
+          .catch(() => hit || new Response('オフラインのため取得できません', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+          }));
         return hit || refresh;
       })
     )
