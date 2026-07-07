@@ -416,7 +416,7 @@ def write_version_file(
 # バージョン / CHANGELOG
 # ──────────────────────────────────────────────
 def parse_semver(text: str | None) -> tuple[int, ...]:
-    """"3.0.0" のような版文字列を比較可能なタプルへ変換する。失敗時は (0,)。"""
+    """ "3.0.0" のような版文字列を比較可能なタプルへ変換する。失敗時は (0,)。"""
     if not text:
         return (0,)
     cleaned = str(text).strip().strip("\"'").lstrip("vV")
@@ -562,10 +562,7 @@ def print_report(plan: dict[str, list[dict[str, str]]]) -> None:
     total_changes = len(update_files) + len(add_files)
     total_skipped = len(skip_project) + len(skip_sample)
     print(f"\n{'-' * 60}")
-    print(
-        f"合計: 変更 {total_changes} / スキップ {total_skipped} / "
-        f"未分類 {len(unclassified)}"
-    )
+    print(f"合計: 変更 {total_changes} / スキップ {total_skipped} / 未分類 {len(unclassified)}")
     print("-" * 60)
 
 
@@ -663,9 +660,7 @@ def cmd_check(args: argparse.Namespace, project_dir: Path) -> int:
             return EXIT_OK
 
         print("\n更新があります。")
-        excerpt = changelog_excerpt(
-            template_dir / CHANGELOG_FILE, applied_version, remote_version
-        )
+        excerpt = changelog_excerpt(template_dir / CHANGELOG_FILE, applied_version, remote_version)
         print("\n--- 変更履歴（抜粋）" + "-" * 40)
         print(excerpt)
         print("-" * 60)

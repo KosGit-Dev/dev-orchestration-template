@@ -129,6 +129,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # gitleaks-action は organization でライセンスキーが必要なため、
+      # composite action で CLI を導入して直接実行する（version/sha256 の正本は同 action）
+      - name: Install gitleaks
+        uses: ./.github/actions/install-gitleaks
+
+      - name: Run gitleaks
+        run: gitleaks git --verbose --report-format=sarif --report-path=gitleaks-report.sarif .
