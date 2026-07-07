@@ -1,0 +1,97 @@
+schema_version: 1
+purpose: >
+  有効コンテキストを小さく決定的に保つ。エージェントは既定で全履歴文書を読まない。
+
+always_read:
+  - ai/command-router.yml
+  - ai/operation-policy.yml
+  - ai/capability-registry.yml
+  - ai/context-index.yml
+
+modes:
+  revise_and_enqueue:
+    required:
+      - ai/sdd-policy.yml
+      - ai/coherence-workflow.yml
+      - docs/requirements.md
+      - docs/plan.md
+      - docs/ai/expectation-ledger.md
+    conditional:
+      # 詳細設計・語彙・spec 雛形はプロジェクトで作成する任意成果物（テンプレートには同梱しない）。
+      - docs/design.md
+      - docs/lexicon/project-lexicon.yml
+      - docs/policies.md
+      - docs/constraints.md
+
+  promote_backlog_to_current_queue:
+    required:
+      - ai/sdd-policy.yml
+      - ai/coherence-workflow.yml
+      - docs/plan.md
+    conditional:
+      - docs/requirements.md
+      - docs/design.md
+      # spec 雛形はプロジェクトで作成する（sdd-policy の spec_template を参照）。
+      - docs/specs/_template.md
+
+  execute_current_queue:
+    required:
+      - ai/sdd-policy.yml
+      - ai/coherence-workflow.yml
+      - ai/pre-pr-review-policy.yml
+      - .github/instructions/review-loop.instructions.md
+      - .github/PULL_REQUEST_TEMPLATE.md
+      - docs/plan.md
+      - docs/ai/execution-ledger.md
+    conditional:
+      # spec 雛形・当該タスク spec はプロジェクトで作成する。
+      - docs/specs/_template.md
+    task_specific:
+      - docs/specs/<TASK_ID>.md
+      - docs/requirements.md#<relevant-section>
+      - docs/design.md#<relevant-section>
+
+  shogun_dispatch:
+    required:
+      - ai/coherence-workflow.yml
+      - docs/plan.md
+      - docs/orchestration.md
+      # 入口プロトコル正本と lease 記録は dispatch の挙動を規定するため required（実在済み）
+      - .github/agents/orchestrator.agent.md
+      - docs/ai/decision-ledger.md
+      # Shogun 運用モデルの運用正本・安全境界（required）
+      - docs/ai/shogun-operating-model.md
+      - docs/ai/shogun-safety-boundary.md
+      # 実作業を伴う dispatch の SDD 鎖の正本（coherence chain 宣言と読込範囲の整合）
+      - ai/sdd-policy.yml
+    conditional:
+      # 複数セッション層（任意）で運用する場合は required 相当として必読（mailbox / lock / nudge の正本）
+      - docs/ai/shogun-multi-session-protocol.md
+      # 実作業を伴う dispatch は ai/sdd-policy.yml の coherence chain に従い、該当正本の関連節を必読とする
+      - docs/requirements.md#<relevant-section>
+      - docs/design.md#<relevant-section>
+      - docs/policies.md
+      - docs/constraints.md
+
+  governance_change:
+    required:
+      - ai/document-governance.yml
+      - ai/sdd-policy.yml
+      - docs/ai/operating-model.md
+      - docs/ai/change-log.md
+    inventory_targets:
+      - AGENTS.md
+      - CLAUDE.md
+      - .github/**/*.md
+      - .claude/**/*.md
+      - docs/**/*.md
+      - ai/**/*.yml
+      - .specify/**
+
+never_read_by_default:
+  - docs/archive/**
+  - docs/research/**
+  - outputs/**
+  - data/**
+  - operator-only/**
+  - prompts/**

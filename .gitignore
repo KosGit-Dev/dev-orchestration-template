@@ -52,7 +52,7 @@ bin/
 pkg/
 
 # IDE / エディタ
-# .vscode/ はリポジトリにコミットする（Codespaces共通化のため）
+# .vscode/ はリポジトリにコミットする（エディタ設定の共通化のため）
 .idea/
 *.swp
 *.swo
@@ -64,3 +64,6 @@ Thumbs.db
 *.tmp
 *.bak
 *.log
+
+# Claude Code hook のランタイム状態（コミットしない）
+.claude/runtime/

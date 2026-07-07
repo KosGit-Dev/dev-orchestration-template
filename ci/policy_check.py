@@ -99,6 +99,9 @@ URL_ALLOWLIST_PATTERNS: list[str] = [
     r"json-schema\.org",
     r"astral\.sh",
     r"opentelemetry\.io",
+    # AI レビュー実行体（scripts/run_ai_review.py）が使う公式 API エンドポイント
+    r"api\.openai\.com",
+    r"api\.anthropic\.com",
 ]
 
 # 禁止操作パターン（言語非依存、全ファイルに適用）

@@ -36,6 +36,22 @@ yaml_get() {
 import sys, re
 
 # 簡易 YAML パーサー（PyYAML 不要）
+def strip_value(raw):
+    # 値本体を取り出す。クォート付きなら閉じクォートより後ろ（インラインコメント含む）を破棄し、
+    # クォートなしなら ' #' 以降をコメントとみなして破棄する（P-065 fix-on-discovery:
+    # 従来は末尾のインラインコメントを保持したまま返しており、project.purpose 等の値が
+    # 破損していた）。
+    raw = raw.strip()
+    if raw[:1] in ('\"', \"'\"):
+        quote = raw[0]
+        end = raw.find(quote, 1)
+        if end != -1:
+            return raw[1:end]
+        return raw[1:].strip(quote)
+    if ' #' in raw:
+        raw = raw.split(' #', 1)[0]
+    return raw.strip()
+
 def parse_yaml(filepath):
     result = {}
     with open(filepath) as f:
@@ -52,14 +68,14 @@ def parse_yaml(filepath):
             # キー: 値（トップレベル）
             m = re.match(r'^(\w[\w.]*)\s*:\s*(.+)', line)
             if m:
-                result[m.group(1)] = m.group(2).strip().strip('\"').strip(\"'\")
+                result[m.group(1)] = strip_value(m.group(2))
                 current_section = ''
                 continue
             # インデントされたキー: 値
             m = re.match(r'^  (\w[\w.]*)\s*:\s*(.+)', line)
             if m and current_section:
                 key = f'{current_section}.{m.group(1)}'
-                result[key] = m.group(2).strip().strip('\"').strip(\"'\")
+                result[key] = strip_value(m.group(2))
 
     return result
 
@@ -83,6 +99,7 @@ info "project-config.yml を読み込み中..."
 PROJECT_NAME=$(yaml_get "project.name")
 DISPLAY_NAME=$(yaml_get "project.display_name")
 DESCRIPTION=$(yaml_get "project.description")
+PROJECT_PURPOSE=$(yaml_get "project.purpose")
 OWNER=$(yaml_get "project.owner")
 PACKAGE_NAME=$(yaml_get "source.package_name")
 SRC_DIR=$(yaml_get "source.src_dir")
@@ -99,6 +116,7 @@ RUN_PREFIX=$(yaml_get "toolchain.run_prefix")
 PROJECT_NAME="${PROJECT_NAME:-my-project}"
 DISPLAY_NAME="${DISPLAY_NAME:-My Project}"
 DESCRIPTION="${DESCRIPTION:-プロジェクトの説明}"
+PROJECT_PURPOSE="${PROJECT_PURPOSE:-project-config.yml の project.purpose を編集してください}"
 PACKAGE_NAME="${PACKAGE_NAME:-my_package}"
 SRC_DIR="${SRC_DIR:-src}"
 RUN_PREFIX="${RUN_PREFIX:-}"
@@ -245,6 +263,22 @@ if [ -f "$REPO_ROOT/docs/architecture.md" ]; then
     fi
 fi
 
+# 入口3ファイル（CLAUDE.md / AGENTS.md / .github/copilot-instructions.md）の
+# {{PROJECT_PURPOSE}} を project-config.yml の project.purpose で置換する。
+# これらは add_only 運用（アップデート機構 v2）のため、bootstrap 後の手動カスタマイズを
+# 上書きしないよう、プレースホルダーが残っている場合のみ置換する。
+if command -v sed > /dev/null 2>&1; then
+    for ENTRYPOINT_FILE in "$REPO_ROOT/CLAUDE.md" "$REPO_ROOT/AGENTS.md" "$REPO_ROOT/.github/copilot-instructions.md"; do
+        if [ -f "$ENTRYPOINT_FILE" ] && grep -q "{{PROJECT_PURPOSE}}" "$ENTRYPOINT_FILE"; then
+            sed -i.bak \
+                -e "s|{{PROJECT_PURPOSE}}|$PROJECT_PURPOSE|g" \
+                "$ENTRYPOINT_FILE"
+            rm -f "$ENTRYPOINT_FILE.bak"
+            ok "$(basename "$ENTRYPOINT_FILE") の {{PROJECT_PURPOSE}} を置換しました"
+        fi
+    done
+fi
+
 ok "テンプレート変数を置換しました"
 
 # ---------------------------------------------------------------------------
@@ -256,17 +290,25 @@ info "CI ワークフローを設定中..."
 CI_FILE="$REPO_ROOT/.github/workflows/ci.yml"
 
 if [ -f "$CI_FILE" ] && [ "$LANGUAGE" = "python" ]; then
-    # Python 用の CI ワークフローを生成（Action はコミットハッシュで固定）
+    # Python 用の CI ワークフローを生成（Action はコミットハッシュで固定）。
+    # quality-gate（policy_check → lint → format → type-check(src/ が存在する場合) → test）
+    # + secret-scan（gitleaks）の構成は .github/workflows/ci.yml の既定と揃える
+    # （P-065 fix-on-discovery: 旧版は secret-scan を欠き、廃止済みブランチ名を決め打ちしていた）。
     cat > "$CI_FILE" << 'CIFILE'
 name: CI
 
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, master]
 
 permissions:
   contents: read
+  pull-requests: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality-gate:
@@ -304,46 +346,34 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Type check (mypy)
+        if: hashFiles('src/**') != ''
         run: uv run mypy src/
 
       - name: Test (pytest)
         run: uv run pytest -q --tb=short
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      # gitleaks-action は organization でライセンスキーが必要なため、
+      # composite action で CLI を導入して直接実行する
+      - name: Install gitleaks
+        uses: ./.github/actions/install-gitleaks
+
+      - name: Run gitleaks
+        run: gitleaks git --verbose --report-format=sarif --report-path=gitleaks-report.sarif .
 CIFILE
     sed -i.bak "s|PYTHON_VERSION|$VERSION|g" "$CI_FILE"
     rm -f "$CI_FILE.bak"
     ok "Python 用 CI ワークフローを生成しました"
-
-    # staging.yml / production.yml の品質チェックステップも有効化
-    for WF_FILE in "$REPO_ROOT/.github/workflows/staging.yml" "$REPO_ROOT/.github/workflows/production.yml"; do
-        if [ -f "$WF_FILE" ]; then
-            # Python 用セットアップのコメント解除
-            sed -i.bak \
-                -e '/# --- Python ---/,/# --- Node\.js ---/{
-                    s|^      # - uses: actions/setup-python@.*|      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5|
-                    s|^      # - uses: actions/setup-python|      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5|
-                    s|^      #   with:|        with:|
-                    s|^      #     python-version:.*|          python-version: "'"$VERSION"'"|
-                    s|^      # - name: Install uv|      - name: Install uv|
-                    s|^      #   run: python -m pip install --upgrade pip && python -m pip install uv|        run: python -m pip install --upgrade pip \&\& python -m pip install uv|
-                    s|^      # - name: Sync dependencies|      - name: Sync dependencies|
-                    s|^      #   run: uv sync --all-extras --dev|        run: uv sync --all-extras --dev|
-                }' \
-                "$WF_FILE"
-            # 品質チェックステップのコメント解除
-            sed -i.bak \
-                -e 's|^      # - name: Lint|      - name: Lint|' \
-                -e 's|^      #   run: {{RUN_PREFIX}} {{LINTER}}|        run: uv run ruff check .|' \
-                -e 's|^      # - name: Format check|      - name: Format check|' \
-                -e 's|^      #   run: {{RUN_PREFIX}} {{FORMATTER}}|        run: uv run ruff format --check .|' \
-                -e 's|^      # - name: Type check|      - name: Type check|' \
-                -e 's|^      #   run: {{RUN_PREFIX}} {{TYPE_CHECKER}}|        run: uv run mypy src/|' \
-                -e 's|^      # - name: Test$|      - name: Test|' \
-                -e 's|^      #   run: {{RUN_PREFIX}} {{TEST_RUNNER}}|        run: uv run pytest -q --tb=short|' \
-                "$WF_FILE"
-            rm -f "$WF_FILE.bak"
-            ok "$(basename "$WF_FILE") の品質チェックを有効化しました"
-        fi
-    done
 fi
 
 # ---------------------------------------------------------------------------

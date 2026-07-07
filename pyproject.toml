@@ -21,6 +21,11 @@ dev = [
     "mutmut>=2.5.0",
 ]
 
+# Stop hook helper はテスト内で .claude/hooks から動的 import する。
+[[tool.mypy.overrides]]
+module = "_block_history"
+ignore_missing_imports = true
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

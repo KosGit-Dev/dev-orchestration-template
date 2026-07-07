@@ -6,7 +6,7 @@ tools:
   - editFiles
   - runInTerminal
   - search
-model: "Claude Sonnet 4.6 (copilot)"
+model: "Claude Haiku 4.5 (copilot)"
 ---
 
 # Test Engineer（テスト担当エージェント）
@@ -36,6 +36,7 @@ model: "Claude Sonnet 4.6 (copilot)"
 - テストは決定的（deterministic）に書く
 - 境界値テストはパラメータ化する
 - テストの独立性を保つ
+- **PR レビュー対応は最大 3 ラウンド**。Round 3 後の非ブロッキング Must/Should は Backlog 化、即時ブロッカーは fail-close
 
 ## セキュリティ制約 <!-- REQUIRED: このセクションは削除しないこと -->
 
@@ -54,7 +55,7 @@ model: "Claude Sonnet 4.6 (copilot)"
 以下の操作は「不可逆または高リスクな操作」であるため、実行前に必ず人間へ確認を取ること。
 確認なしにこれらの操作を実行してはならない。
 
-- 本番ブランチ（`main`・`staging`・`production`）への直接コミットまたはプッシュ
+- 保護ブランチ（`main`）への直接コミットまたはプッシュ
 - Pull Request のマージ
 - 外部サービスへのデータ送信
 - ファイルの削除操作

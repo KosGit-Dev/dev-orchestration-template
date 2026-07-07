@@ -1,0 +1,137 @@
+schema_version: 1
+workflows:
+  revise_and_enqueue:
+    operating_context: daily_development
+    steps:
+      - load_context_index
+      - capture_original_user_intent
+      - classify_intent
+      - resolve_ordinary_ambiguity_internally
+      - update_expectation_ledger
+      - update_or_justify_requirements
+      - update_or_justify_design
+      - update_lexicon_if_needed
+      - create_or_update_task_spec
+      - update_plan_current_queue
+      - validate_harness_ready
+      - record_decision_ledger
+
+  promote_backlog_to_current_queue:
+    operating_context: daily_development
+    steps:
+      - load_context_index
+      - inventory_backlog
+      - deduplicate_backlog
+      - order_by_dependency_and_risk
+      - ensure_requirements_design_spec_for_each_task
+      - add_acceptance_criteria
+      - add_verification_commands
+      - add_runtime_smoke
+      - move_to_current_execution_queue
+      - validate_harness_ready
+      - record_decision_ledger
+
+  execute_current_queue:
+    operating_context: daily_development
+    description: >
+      現在の plan queue を end-to-end で実行し、実装完了で止めずに PR 作成、
+      push 後レビュー、CI final gate、release-manager、全プラン実行モードの
+      merge / main pull / 次タスク遷移までを同一ライフサイクルとして扱う。
+    steps:
+      - load_context_index
+      - load_execution_ledger
+      - select_current_queue_head
+      - load_task_spec
+      - reference_requirements_design_spec_completion_conditions   # plan 確認後に必ず FR/spec/design/完了条件を参照（plan だけで判定しない）
+      - verify_requirements_design_spec_completion_conditions_alignment
+      - implement
+      - run_targeted_tests
+      - run_static_checks
+      - propagate_to_related_docs_and_types
+      - run_runtime_smoke
+      - run_pre_pr_critical_review
+      - verify_completion_conditions_via_critical_review_and_independent_peer  # ai/sdd-policy.yml per_task_completion_verification_loop を必須通過（双方満たすまで reimplement→reverify を反復）
+      - record_evidence
+      - update_execution_ledger
+      - classify_release_if_needed
+      - commit_changes
+      - push_branch
+      - create_pr_with_template
+      - request_ai_review_or_repo_aware_fallback
+      - monitor_ci_final_gate
+      - address_ci_and_review_findings
+      - run_release_manager
+      - merge_pr_when_full_plan_mode
+      - pull_main_after_merge
+      - update_plan_after_merge
+      - update_execution_ledger_after_merge
+      - proceed_to_next_task
+    completion_gate:
+      implementation_only_is_incomplete: true
+      pr_required_before_task_done: true
+      push_review_loop_required: true
+      ci_final_gate_required: true
+      release_manager_required: true
+      full_plan_mode_requires_merge_before_next_task: true
+      single_task_mode_stops_at_pr_ready: true
+    full_plan_delivery_loop:
+      branch_source: main
+      pr_base: main
+      pr_body_source: .github/PULL_REQUEST_TEMPLATE.md
+      pr_body_transport: --body-file
+      review_loop_source: .github/instructions/review-loop.instructions.md
+      merge_after_release_manager_approval: true
+      post_merge_sequence:
+        - gh_pr_merge_rebase_delete_branch
+        - git_checkout_main
+        - git_pull_origin_main
+        - update_plan_task_state
+        - continue_or_stop_by_next_queue
+
+  governance_change:
+    operating_context: governance_change
+    steps:
+      - load_context_index
+      - audit_existing_rules
+      - ask_or_propose_when_future_operation_is_affected
+      - update_policy_files
+      - update_entrypoint_docs
+      - run_document_inventory
+      - run_harness_validators
+      - record_decision_ledger
+      - produce_migration_notes
+
+  shogun_dispatch:
+    operating_context: daily_development
+    description: >
+      ai/command-router.yml の commands（日常 3 コマンド + governance_change パターン）に
+      一致しない雑依頼の既定入口。Shogun は orchestrator の入口拡張であり新司令塔
+      エージェントではない。分解の規模は依頼の規模に比例させ、単純な質問・単発の軽作業は
+      分解せず直接処理してよい（報告は caveman_lite_v1）。
+      運用正本は docs/ai/shogun-operating-model.md。
+    steps:
+      - load_context_index
+      - confirm_current_state            # docs/plan.md 優先順注記・git 状態・関連正本の現状確認
+      - capture_intent_and_constraints   # intent / constraints / 安全床の抽出
+      - reclassify_governance_change_if_applicable
+        # ↑ governance_change の user_patterns に一致しなくても、実質 governance_change 相当
+        #   （運用ルール・policy・hook・branch/release policy・長期 workflow の変更）と判断した依頼は
+        #   shogun_dispatch で処理せず governance_change workflow（確認・対話許可）へ再分類する（fail-close）。
+      - classify_risk_tier               # ai/operation-policy.yml の tiers / hard_block を参照（複製しない）
+      - check_capability_lease           # plan 注記 / docs/ai/decision-ledger.md の scoped lease を確認
+      - decompose_into_work_packets      # 最大 8。軽作業は分解せず直接処理
+      - delegate_to_subagents            # Karo/Gunshi/Ashigaru = 既存サブエージェントへの委譲パターン名
+      - integrate_results
+      - verify_safety_floor              # hard_block / red_if_touches 非接触の確認（fail-close）
+      - report_with_contract             # 実作業 = shogun_report_contract_v1 / 軽作業 = caveman_lite_v1
+    dispatch_rules:
+      max_work_packets: 8
+      light_request_direct_handling: true
+      merge_autonomy: >
+        全プラン実行モード、または scoped lease（「Shogun 判断で進めて」
+        「マージまで進めて」等の明示句）がある場合のみ自律で merge へ進む。
+        いずれの場合も pre-PR critical review・push 後レビューループ・CI（品質ゲート）・
+        release-manager 承認の既存ゲートを全て通過した後にのみ merge を実行する
+        （lease は既存ゲートを免除しない・新しい merge 経路を作らない）。
+        それ以外の merge は人間判断。CI が利用不能な場合のみローカル gate 手順へ
+        fallback し、その post と merge はユーザー個別認可を要する。

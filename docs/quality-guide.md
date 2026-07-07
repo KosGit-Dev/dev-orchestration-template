@@ -166,6 +166,9 @@ Property-based testing の完全なサンプルは以下を参照:
 Python 向けのミューテーションテストツールとして [mutmut](https://github.com/boxed/mutmut) を使用する。
 ライセンスは BSD 3-Clause（許可リスト内）。
 
+> 注: 本テンプレートの既定 CI（`.github/workflows/ci.yml`）ではミューテーションテストを実行しない
+> （個人開発の既定では実行時間コストが過剰なため）。品質を強化したいプロジェクトが任意で導入する。
+
 #### mutmut の設定
 
 `pyproject.toml` に以下の設定を追加する（テンプレートでは設定済み）:

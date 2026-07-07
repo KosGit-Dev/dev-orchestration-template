@@ -2,7 +2,7 @@
 
 ## 目的
 
-`docs/plan.md` の Next にある先頭タスクを、ブランチ作成から PR 作成まで一貫して自動実行する。
+`docs/plan.md` の Next にある先頭タスクを、ブランチ作成から PR 作成、push 後レビュー、CI 全チェック確認、release-manager、全プラン実行モードの merge / main pull / 次タスク遷移まで一貫して自動実行する。
 
 ## 前提
 
@@ -54,12 +54,18 @@
 15. 関連 Issue を `Closes #XX` で紐付ける
 
 ### 7. PR 検証
-16. `gh pr checks <PR番号> --watch` で CI 結果を確認
+16. `gh pr checks <PR番号>` を単発実行して CI 結果を確認（watchモード等のブロッキング待機禁止）
+    - pending の場合はエージェント進行管理で次のポーリングへ進む（同期 sleep ループ禁止）
 17. 失敗時は修正→再プッシュ→再確認（最大3回）
 
-### 8. リリース判定
-18. release-manager に最終判定を委譲
-19. 人間の最終承認を得てからマージ
+### 8. PR 後レビューループ / CI 全チェック確認
+18. `.github/instructions/review-loop.instructions.md` に従い、push 後 AI レビュー（Copilot または Codex / Claude repo-aware fallback）を最大 3 ラウンドまで完了させる
+19. `gh pr checks` で全チェックを確認し、実 failure は修正して再 push する
+
+### 9. リリース判定 / マージ
+20. release-manager に最終判定を委譲
+21. 単発実行モードでは、release-manager 承認済み PR ready を報告して停止する
+22. 全プラン実行モードでは、release-manager 承認後に PR を merge し、`main` を pull し、plan / execution ledger を更新して次タスクへ進む
 
 ## チェックリスト
 
@@ -72,4 +78,6 @@
 - [ ] 必要な docs が更新されている（AC-030）
 - [ ] PR に検証手順と結果が記載されている（AC-040）
 - [ ] PR の CI が成功する
+- [ ] push 後 AI レビューループが完了している
 - [ ] 監査の Must 指摘がゼロである
+- [ ] 全プラン実行モードでは merge / main pull / 次タスク遷移まで完了している

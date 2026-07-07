@@ -1,0 +1,122 @@
+# 仕様駆動開発 policy。
+
+schema_version: 1
+purpose: >
+  user intent から implementation へ直接飛ぶこと、または plan-only 更新で済ませることを防ぐ。
+  意味のある変更は必ず coherence chain を維持する。
+
+coherence_chain:
+  required_order:
+    - user_intent
+    - expectation_ledger
+    - requirements
+    - design
+    - lexicon_if_needed
+    - task_spec
+    - plan_queue
+    - implementation
+    - tests
+    - verification
+    - propagation
+    - runtime_smoke
+    - evidence
+
+daily_commands:
+  revise_and_enqueue:
+    must_update_or_justify_no_update:
+      - docs/requirements.md
+      - docs/design.md
+      - docs/plan.md
+      - docs/specs
+      - docs/ai/expectation-ledger.md
+    must_not_complete_with_only:
+      - docs/plan.md
+  promote_backlog_to_current_queue:
+    each_task_requires:
+      - requirements_mapping
+      - design_mapping
+      - spec
+      - acceptance_criteria
+      - verification_commands
+      - runtime_smoke
+      - risk_tier
+  execute_current_queue:
+    each_task_requires_before_done:
+      - plan_then_reference_requirements_spec_design_completion_conditions
+      - all_acceptance_criteria_passed_or_backlogged_with_reason
+      - completion_conditions_verified_by_critical_review_and_independent_peer   # 下記 per_task_completion_verification_loop を必須通過
+      - verification_commands_run
+      - runtime_smoke_passed_or_explicitly_not_applicable
+      - evidence_recorded
+      - execution_ledger_updated
+      - changes_committed_and_pushed
+      - pr_created_with_template_or_existing_pr_resumed
+      - push_review_loop_completed_or_blocker_recorded
+      - ci_final_gate_passed_or_blocker_recorded
+      - release_manager_completed
+      - full_plan_mode_pr_merged_before_next_task
+      - main_pulled_after_merge
+      - plan_and_execution_ledger_updated_after_merge
+
+  # 各タスクの「完了条件を満たしたか」を、批判的レビューと independent peer auditor
+  # （独立 peer 監査。capability role の正本は ai/capability-registry.yml）の双方が満たしたと
+  # 判断するまで実装と検証を反復する必須ループ。
+  # push 後の review_loop（最大 3 ラウンド・findings 対応）とは別レイヤで、PR 作成前の
+  # 「完了条件充足の独立確認」を担う。完了条件は task spec の Acceptance Criteria /
+  # Completion Rules / Runtime Smoke / Verification Commands と requirements / design の
+  # 該当要件を正本とする（plan.md だけでは判定しない）。
+  per_task_completion_verification_loop:
+    operating_context: daily_development
+    entry_after: [implement, run_targeted_tests, run_static_checks, run_runtime_smoke]
+    reference_sources_mandatory:
+      - docs/plan.md            # 当該タスクの queue エントリ・状態
+      - docs/requirements.md    # 紐づく FR（requirements_mapping）
+      - docs/specs              # task spec の AC / Completion Rules / Runtime Smoke / Verification
+      - docs/design.md          # design_mapping
+    # risk tier 連動:
+    # tier 判定の正本は ai/operation-policy.yml の release_to_main（ここに複製しない）。
+    # green = release_to_main 分類で green と判定された変更のみ（red_if_touches 非接触でも
+    # yellow 判定の変更は yellow_and_red 側）。完了条件の Backlog 化不可・fail-close は
+    # tier に関わらず不変。verifier 集合の正本は本 verifiers_by_risk_tier（単一定義）。
+    # 該当 tier の verifier 全てが「完了条件を満たした」と判断するまで PR へ進めない。
+    verifiers_by_risk_tier:
+      green:
+        - critical_review       # uv run scripts/ai/run_pre_pr_critical_review.py（ai/pre-pr-review-policy.yml）+ 独立 auditor サブエージェント
+      yellow_and_red:
+        - critical_review
+        - independent_peer_review   # 独立 peer 監査。担い手は下記 independent_peer_fallback_ladder
+    on_any_verifier_not_satisfied:
+      - reimplement_or_fix
+      - rerun_targeted_tests_and_static_checks_and_runtime_smoke
+      - reverify_completion_conditions
+    # exit_condition のトークン名は coherence-workflow の step 名
+    # （verify_completion_conditions_via_critical_review_and_independent_peer）と対で維持する。
+    # green では「independent peer 部分は tier 規定により免除」と読み替える（verifiers_by_risk_tier が正）。
+    exit_condition: completion_conditions_satisfied_per_both_critical_review_and_independent_peer
+    completion_conditions_are_not_backloggable: true
+    # 当該タスクの完了条件＝spec の Acceptance Criteria / Completion Rules / Verification Commands /
+    # Runtime Smoke + 紐づく FR/design の制約。これらは **Backlog 化不可**。批判的レビューと
+    # independent peer auditor の双方が「満たした」と判断するまで reimplement→reverify を反復し、未充足のまま task を done に
+    # しない（fail-close＝未完了として残す）。max_rounds は**完了条件に該当しない review nitpick
+    # （文体・将来改善の should 等）にのみ**適用し、Round 3 後にそれら非完了条件項目だけ Backlog 化
+    # できる（review-loop.instructions.md と整合）。完了条件自体は round 上限で打ち切らない。
+    max_rounds_for_non_completion_nitpicks: 3
+    evidence: docs/ai/reviews   # 双方の判断（result/findings/round）を証跡化
+    independent_peer_fallback_ladder: >
+      L1（既定）= primary と別 provider または別推論系列の最上位監査モデル
+      （例: agmsg 経由の別ハーネス監査）。L2 = L1 が利用不能（sandbox ハング・認証不能・quota）
+      の場合、harness-symmetric（各ハーネスが自前で同等監査を実施する対称性）に基づく
+      同 provider の独立 auditor サブエージェント。L3 = それも不能な場合、標準モデルへ監査
+      scope を縮小して依頼し、見送った監査観点を未検証リスクとして明記する。どの段で実施
+      したかを review 証跡（provider と代替明記）から機械判別可能にし、independent peer を
+      「未確認」のまま PR へ進めない。
+
+spec_template: docs/specs/_template.md
+
+completion_rules:
+  plan_only_is_not_done: true
+  design_only_is_not_done: true
+  tests_green_is_necessary_not_sufficient: true
+  runtime_smoke_required_for_user_visible_changes: true
+  user_visible_outcome_required: true
+  non_goals_required: true
