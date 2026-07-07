@@ -32,12 +32,15 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from importlib import import_module
 from pathlib import Path
 from typing import Any
 
-# PyYAML が利用できない環境への対策（簡易パーサーへフォールバック）
+# PyYAML が利用できない環境への対策（簡易パーサーへフォールバック）。
+# スタブ（types-PyYAML）の有無に依存せず mypy strict で安定させるため、
+# 動的 import で Any 型の変数に束縛する（レビュー指摘反映）。
 try:
-    import yaml
+    yaml: Any | None = import_module("yaml")
 except ImportError:  # pragma: no cover - 実行環境依存
     yaml = None
 
