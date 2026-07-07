@@ -1,5 +1,5 @@
 # =============================================================================
-# Install gitleaks（composite action・N-431）
+# Install gitleaks（composite action）
 # =============================================================================
 # gitleaks CLI を SHA256 検証つきで $RUNNER_TEMP/bin へ導入し PATH へ追加する。
 # self-hosted runner では /usr/local/bin へ書込権限がないため root 非依存で展開する。

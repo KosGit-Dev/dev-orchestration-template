@@ -24,12 +24,12 @@ from scripts.ai.collect_review_context import (
     ReviewContextManifest,
     collect_review_context,
 )
-from scripts.ai.review_report_gate import (
+from scripts.ai.review_evidence import (
     REVIEW_REPORT_PREFIX,
     diff_fingerprint,
     merge_base,
 )
-from scripts.ai.review_report_gate import (
+from scripts.ai.review_evidence import (
     SCHEMA_VERSION as REVIEW_REPORT_SCHEMA_VERSION,
 )
 

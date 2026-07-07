@@ -202,8 +202,6 @@ def main() -> None:
             "明示的にリクエストする\n"
             "   例: gh api repos/{owner}/{repo}/pulls/<PR番号>/requested_reviewers "
             "-X POST -f 'reviewers[]=copilot-pull-request-reviewer[bot]'\n"
-            "   代替: gh workflow run ai-review-fallback.yml "
-            "-f pr_number=<PR番号> -f primary_engine=copilot\n"
             "4. AIレビュー到着確認（最大20回。同期 sleep ループは禁止。"
             "初回+5回ごとにレビュワー再確認）\n"
         )
