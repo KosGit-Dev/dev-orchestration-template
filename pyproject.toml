@@ -21,6 +21,11 @@ dev = [
     "mutmut>=2.5.0",
 ]
 
+# PyYAML は型スタブ（types-PyYAML）が別パッケージのため、スタブなし環境でもエラーを抑制する。
+[[tool.mypy.overrides]]
+module = "yaml"
+ignore_missing_imports = true
+
 # Stop hook helper はテスト内で .claude/hooks から動的 import する。
 [[tool.mypy.overrides]]
 module = "_block_history"
