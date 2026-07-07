@@ -5,7 +5,8 @@ name: Deploy Pages
 
 on:
   push:
-    branches: [master, claude/whiskey-exam-game-f1dx9h]
+    # 作業ブランチはマージ前の公開検証用。PR #36 マージ後に削除してよい
+    branches: [main, master, claude/whiskey-exam-game-f1dx9h]
     paths:
       - "app/**"
       - ".github/workflows/deploy-pages.yml"
